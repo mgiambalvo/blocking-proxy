@@ -1,6 +1,6 @@
 {
-  "name": "stabilityproxy",
-  "description": "WebDriver Proxy for stabilizing Angular pages.",
+  "name": "blockingproxy",
+  "description": "WebDriver Proxy for testing rich clients. It block certain calls until Angular is done updating the page under test.",
   "homepage": "https://github.com/angular/",
   "keywords": [
     "test",
@@ -10,11 +10,15 @@
     "selenium"
   ],
   "author": "Julie Ralph <ju.ralph@gmail.com>",
+  "author": "Michael Giambalvo <heathkit@google.com>",
   "devDependencies": {
+    "clang-format": "^1.0.34",
+    "gulp": "^3.9.1",
+    "gulp-clang-format": "^1.0.23",
     "jshint": "2.5.0",
     "jasmine": "2.3.2",
-    "selenium-webdriver": "2.48.1",
-    "q": "1.1.2"
+    "selenium-webdriver": "2.48.2",
+    "typescript": "~1.8.0"
   },
   "repository": {
     "type": "git",
