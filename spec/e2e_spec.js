@@ -17,7 +17,7 @@ describe('stability proxy', function() {
 
   it('should get a page with Angular and wait for a slow action', function(done) {
     driver.manage().timeouts().setScriptTimeout(20000);
-    driver.get('http://localhost:8081/index.html#/async');
+    driver.get('http://localhost:8081/ng1/index.html#/async');
     driver.findElement(webdriver.By.css('[ng-bind="slowHttpStatus"]')).getText().then(function(text) {
       expect(text).toEqual('not started');
     });
