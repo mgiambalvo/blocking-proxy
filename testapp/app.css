@@ -1,0 +1,29 @@
+body {
+  font-family: Helvetica, Arial, san-sarif;
+  font-size: 2em;
+}
+
+h1 {
+  text-align: center;
+}
+
+ol {
+  position: relative;
+  padding: 0;
+}
+
+li {
+  width: 40%;
+  padding: 5%;
+  display: block;
+}
+
+li.left {
+  text-align: right;
+}
+
+li.right {
+  position: absolute;
+  top: 0;
+  right: 0;
+} 
