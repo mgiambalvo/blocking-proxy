@@ -11,14 +11,22 @@
   ],
   "author": "Julie Ralph <ju.ralph@gmail.com>",
   "author": "Michael Giambalvo <heathkit@google.com>",
+  "dependencies": {
+    "optimist": "~0.6.0",
+    "q": "1.4.1"
+  },
   "devDependencies": {
+    "body-parser": "1.14.2",
     "clang-format": "^1.0.34",
+    "express": "~4.13.3",
     "gulp": "^3.9.1",
     "gulp-clang-format": "^1.0.23",
     "jshint": "2.5.0",
     "jasmine": "2.3.2",
     "selenium-webdriver": "2.48.2",
-    "typescript": "~1.8.0"
+    "typescript": "~1.8.0",
+    "run-sequence": "^1.1.5",
+    "webdriver-manager": "~1.0.0"
   },
   "repository": {
     "type": "git",
@@ -27,7 +35,8 @@
   "main": "index.js",
   "scripts": {
     "pretest": "node_modules/.bin/jshint index.js lib test",
-    "test": "node_modules/.bin/jasmine JASMINE_CONFIG_PATH=jasmine_config.json"
+    "start": "node testapp/scripts/web-server.js",
+    "test": "node_modules/.bin/jasmine"
   },
   "license": "MIT",
   "version": "0.0.1"
