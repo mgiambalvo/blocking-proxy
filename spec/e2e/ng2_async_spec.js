@@ -1,10 +1,7 @@
-// TODO Enable once ng1 is working
 xdescribe('async angular2 application', function() {
   var URL = '/ng2/#/async';
 
-  beforeEach(function() {
-    browser.get(URL);
-  });
+  beforeEach(function() { browser.get(URL); });
 
   it('should work with synchronous actions', function() {
     var increment = $('#increment');

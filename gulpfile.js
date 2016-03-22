@@ -27,7 +27,7 @@ gulp.task('jslint', function(done) {
 });
 
 gulp.task('clang', function() {
-  return gulp.src(['lib/**/*.ts'])
+  return gulp.src(['lib/**/*.ts', 'lib/**/*.js', 'spec/**/*.js'])
       .pipe(gulpFormat.checkFormat('file', clangFormat))
       .on('warning', function(e) {
     console.log(e);

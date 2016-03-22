@@ -34,7 +34,7 @@
   },
   "main": "index.js",
   "scripts": {
-    "pretest": "node_modules/.bin/jshint index.js lib test",
+    "pretest": "node_modules/.bin/jshint index.js lib spec",
     "start": "node testapp/scripts/web-server.js",
     "test": "node_modules/.bin/jasmine"
   },

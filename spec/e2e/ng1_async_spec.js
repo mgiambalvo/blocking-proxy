@@ -11,23 +11,21 @@ describe('synchronizing with slow pages', function() {
   });
 
   // TODO: Create a common driver session for all e2e tests.
-  var driver = new webdriver.Builder().
-    usingServer('http://localhost:8111').
-    withCapabilities(webdriver.Capabilities.chrome()).
-    build();
+  var driver = new webdriver.Builder()
+                   .usingServer('http://localhost:8111')
+                   .withCapabilities(webdriver.Capabilities.chrome())
+                   .build();
 
-  afterAll(function(done) {
-    driver.quit().then(done, done.fail);
-  });
+  afterAll(function(done) { driver.quit().then(done, done.fail); });
 
   function findElement(sel) {
     return driver.findElement(webdriver.By.css(sel));
   }
 
   function expectText(el, done, expected) {
-    return el.getText().then((text) => {
-      expect(text).toEqual(expected);
-    }).thenCatch(done.fail);
+    return el.getText()
+        .then((text) => { expect(text).toEqual(expected); })
+        .thenCatch(done.fail);
   }
 
   it('waits for http calls', function(done) {
@@ -104,9 +102,9 @@ describe('synchronizing with slow pages', function() {
 
     button.click();
 
-    driver.getPageSource().then((source) => {
-      expect(source).toMatch('polling mechanism');
-    }).then(done);
+    driver.getPageSource()
+        .then((source) => { expect(source).toMatch('polling mechanism'); })
+        .then(done);
   }, 10000);
 
   it('waits for slow ng-include templates to load', function(done) {
