@@ -1,7 +1,7 @@
 var util = require('util');
 var webdriver = require('selenium-webdriver');
 
-fdescribe('synchronizing with slow pages', function() {
+describe('synchronizing with slow pages', function() {
   var HOST = 'http://localhost:8081';
   var URL = '/ng1/#/async';
 
@@ -10,11 +10,11 @@ fdescribe('synchronizing with slow pages', function() {
     driver.get(HOST + URL);
   });
 
+  // TODO: Create a common driver session for all e2e tests.
   var driver = new webdriver.Builder().
     usingServer('http://localhost:8111').
     withCapabilities(webdriver.Capabilities.chrome()).
     build();
-
 
   afterAll(function(done) {
     driver.quit().then(done, done.fail);
@@ -24,98 +24,100 @@ fdescribe('synchronizing with slow pages', function() {
     return driver.findElement(webdriver.By.css(sel));
   }
 
-  fit('waits for http calls', function(done) {
+  function expectText(el, done, expected) {
+    return el.getText().then((text) => {
+      expect(text).toEqual(expected);
+    }).thenCatch(done.fail);
+  }
+
+  it('waits for http calls', function(done) {
     var status = findElement('[ng-bind="slowHttpStatus"]');
     var button = findElement('[ng-click="slowHttp()"]');
 
-    status.getText().then((text) => {
-      expect(text).toEqual('not started');
-    }).thenCatch(done.fail);
+    expectText(status, done, 'not started');
 
     button.click().thenCatch(done.fail);
 
-    status.getText().then((text) => {
-      expect(text).toEqual('done');
-      done();
-    }).thenCatch(done.fail);
+    expectText(status, done, 'done').then(done);
   }, 10000);
 
-  it('waits for long javascript execution', function() {
-    var status = element(webdriver.By.binding('slowFunctionStatus'));
-    var button = element(webdriver.By.css('[ng-click="slowFunction()"]'));
+  it('waits for long javascript execution', function(done) {
+    var status = findElement('[ng-bind="slowFunctionStatus"]');
+    var button = findElement('[ng-click="slowFunction()"]');
 
-    expect(status.getText()).toEqual('not started');
+    expectText(status, done, 'not started');
 
-    button.click();
+    button.click().thenCatch(done.fail);
 
-    expect(status.getText()).toEqual('done');
-  });
+    expectText(status, done, 'done').then(done);
+  }, 10000);
 
-  it('DOES NOT wait for timeout', function() {
-    var status = element(webdriver.By.binding('slowTimeoutStatus'));
-    var button = element(webdriver.By.css('[ng-click="slowTimeout()"]'));
+  it('DOES NOT wait for timeout', function(done) {
+    var status = findElement('[ng-bind="slowTimeoutStatus"]');
+    var button = findElement('[ng-click="slowTimeout()"]');
 
-    expect(status.getText()).toEqual('not started');
+    expectText(status, done, 'not started');
 
-    button.click();
+    button.click().thenCatch(done.fail);
 
-    expect(status.getText()).toEqual('pending...');
-  });
+    expectText(status, done, 'pending...').then(done);
+  }, 10000);
 
-  it('waits for $timeout', function() {
-    var status = element(webdriver.By.binding('slowAngularTimeoutStatus'));
-    var button = element(webdriver.By.css('[ng-click="slowAngularTimeout()"]'));
+  it('waits for $timeout', function(done) {
+    var status = findElement('[ng-bind="slowAngularTimeoutStatus"]');
+    var button = findElement('[ng-click="slowAngularTimeout()"]');
 
-    expect(status.getText()).toEqual('not started');
-
-    button.click();
-
-    expect(status.getText()).toEqual('done');
-  });
-
-  it('waits for $timeout then a promise', function() {
-    var status = element(webdriver.By.binding(
-          'slowAngularTimeoutPromiseStatus'));
-    var button = element(webdriver.By.css(
-          '[ng-click="slowAngularTimeoutPromise()"]'));
-
-    expect(status.getText()).toEqual('not started');
+    expectText(status, done, 'not started');
 
     button.click();
 
-    expect(status.getText()).toEqual('done');
-  });
+    expectText(status, done, 'done').then(done);
+  }, 10000);
 
-  it('waits for long http call then a promise', function() {
-    var status = element(webdriver.By.binding('slowHttpPromiseStatus'));
-    var button = element(webdriver.By.css('[ng-click="slowHttpPromise()"]'));
+  it('waits for $timeout then a promise', function(done) {
+    var status = findElement('[ng-bind="slowAngularTimeoutPromiseStatus"]');
+    var button = findElement('[ng-click="slowAngularTimeoutPromise()"]');
 
-    expect(status.getText()).toEqual('not started');
-
-    button.click();
-
-    expect(status.getText()).toEqual('done');
-  });
-
-  it('waits for slow routing changes', function() {
-    var status = element(webdriver.By.binding('routingChangeStatus'));
-    var button = element(webdriver.By.css('[ng-click="routingChange()"]'));
-
-    expect(status.getText()).toEqual('not started');
+    expectText(status, done, 'not started');
 
     button.click();
 
-    expect(browser.getPageSource()).toMatch('polling mechanism');
-  });
+    expectText(status, done, 'done').then(done);
+  }, 10000);
 
-  it('waits for slow ng-include templates to load', function() {
-    var status = element(webdriver.By.css('.included'));
-    var button = element(webdriver.By.css('[ng-click="changeTemplateUrl()"]'));
+  it('waits for long http call then a promise', function(done) {
+    var status = findElement('[ng-bind="slowHttpPromiseStatus"]');
+    var button = findElement('[ng-click="slowHttpPromise()"]');
 
-    expect(status.getText()).toEqual('fast template contents');
+    expectText(status, done, 'not started');
 
     button.click();
 
-    expect(status.getText()).toEqual('slow template contents');
-  });
+    expectText(status, done, 'done').then(done);
+  }, 10000);
+
+  it('waits for slow routing changes', function(done) {
+    var status = findElement('[ng-bind="routingChangeStatus"]');
+    var button = findElement('[ng-click="routingChange()"]');
+
+    expectText(status, done, 'not started');
+
+    button.click();
+
+    driver.getPageSource().then((source) => {
+      expect(source).toMatch('polling mechanism');
+    }).then(done);
+  }, 10000);
+
+  it('waits for slow ng-include templates to load', function(done) {
+    var status = findElement('.included');
+    var button = findElement('[ng-click="changeTemplateUrl()"]');
+
+    expectText(status, done, 'fast template contents');
+
+    button.click();
+
+    status = findElement('.included');
+    expectText(status, done, 'slow template contents').then(done);
+  }, 10000);
 });
