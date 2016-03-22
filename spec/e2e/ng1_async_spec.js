@@ -1,35 +1,44 @@
 var util = require('util');
 var webdriver = require('selenium-webdriver');
 
-var driver = new webdriver.Builder().
-  usingServer('http://localhost:8111').
-  withCapabilities(webdriver.Capabilities.chrome()).
-  build();
-
-xdescribe('synchronizing with slow pages', function() {
+fdescribe('synchronizing with slow pages', function() {
   var HOST = 'http://localhost:8081';
   var URL = '/ng1/#/async';
 
   beforeEach(function() {
+    driver.manage().timeouts().setScriptTimeout(20000);
     driver.get(HOST + URL);
   });
 
-  function element(el) {
-    return driver.findElement(el);
+  var driver = new webdriver.Builder().
+    usingServer('http://localhost:8111').
+    withCapabilities(webdriver.Capabilities.chrome()).
+    build();
+
+
+  afterAll(function(done) {
+    driver.quit().then(done, done.fail);
+  });
+
+  function findElement(sel) {
+    return driver.findElement(webdriver.By.css(sel));
   }
 
-  it('waits for http calls', function() {
-    var status = element(webdriver.By.binding('slowHttpStatus'));
-    var button = element(webdriver.By.css('[ng-click="slowHttp()"]'));
+  fit('waits for http calls', function(done) {
+    var status = findElement('[ng-bind="slowHttpStatus"]');
+    var button = findElement('[ng-click="slowHttp()"]');
 
-    /*
-    expect(status.getText()).toEqual('not started');
+    status.getText().then((text) => {
+      expect(text).toEqual('not started');
+    }).thenCatch(done.fail);
 
-    button.click();
+    button.click().thenCatch(done.fail);
 
-    expect(status.getText()).toEqual('done');
-    */
-  });
+    status.getText().then((text) => {
+      expect(text).toEqual('done');
+      done();
+    }).thenCatch(done.fail);
+  }, 10000);
 
   it('waits for long javascript execution', function() {
     var status = element(webdriver.By.binding('slowFunctionStatus'));
