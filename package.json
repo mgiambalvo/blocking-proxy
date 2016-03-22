@@ -21,7 +21,7 @@
     "express": "~4.13.3",
     "gulp": "^3.9.1",
     "gulp-clang-format": "^1.0.23",
-    "jshint": "2.5.0",
+    "jshint": "2.9.1",
     "jasmine": "2.3.2",
     "selenium-webdriver": "2.48.2",
     "typescript": "~1.8.0",
@@ -37,6 +37,9 @@
     "pretest": "node_modules/.bin/jshint index.js lib spec",
     "start": "node testapp/scripts/web-server.js",
     "test": "node_modules/.bin/jasmine"
+  },
+  "jshintConfig":{
+    "esversion": 6
   },
   "license": "MIT",
   "version": "0.0.1"
