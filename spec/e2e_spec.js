@@ -5,12 +5,12 @@ var webdriver = require('selenium-webdriver');
 // - a selenium standalone is running at port 4444
 // - the test application is running at port 8081
 
-var driver = new webdriver.Builder().
-  usingServer('http://localhost:8111').
-  withCapabilities(webdriver.Capabilities.chrome()).
-  build();
-
 describe('stability proxy', function() {
+  var driver = new webdriver.Builder().
+    usingServer('http://localhost:8111').
+    withCapabilities(webdriver.Capabilities.chrome()).
+    build();
+
   afterAll(function(done) {
     driver.quit().then(done, done.fail);
   });
