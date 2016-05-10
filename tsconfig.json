@@ -14,7 +14,8 @@
     "node_modules",
     "selenium",
     "testapp",
-    "typings"
+    "typings/browser",
+    "typings/browser.d.ts"
   ],
   "filesGlob": [
     "**/*.ts"

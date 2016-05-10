@@ -1,0 +1,6 @@
+{
+  "spec_dir": "built/spec/unit",
+  "spec_files": [
+    "**/*[sS]pec.js"
+  ]
+}
