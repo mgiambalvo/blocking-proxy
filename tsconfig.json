@@ -12,6 +12,11 @@
   "exclude": [
     "built",
     "node_modules",
-    "testapp"
+    "selenium",
+    "testapp",
+    "typings"
+  ],
+  "filesGlob": [
+    "**/*.ts"
   ]
 }
