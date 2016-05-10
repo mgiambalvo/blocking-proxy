@@ -1,5 +1,3 @@
-/// <reference path = "../typings/main.d.ts"/>
-
 import * as http from 'http';
 import * as url from 'url';
 import * as q from 'q';
