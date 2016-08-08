@@ -1,4 +1,4 @@
-TODO
+# TODO
 
  - Fix ng2 e2e tests
  - set up travis
@@ -19,3 +19,20 @@ work with all the existing methods of starting up webdriver.
 
 Should pass up errors in a reasonable way.
 
+# Running e2e tests
+Start webdriver
+
+    webdriver-manager update
+    webdriver-manager start
+
+in another terminal, start the testapp
+
+    npm run testapp 
+
+Start the proxy with 
+  
+    npm start
+
+in yet another terminal, run the tests
+
+    npm run test:e2e

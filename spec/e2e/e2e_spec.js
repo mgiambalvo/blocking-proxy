@@ -1,7 +1,7 @@
 var webdriver = require('selenium-webdriver');
 
 // Assumes that:
-// - a stability proxy is running at port 8111
+// - a blocking proxy is running at port 8111
 // - a selenium standalone is running at port 4444
 // - the test application is running at port 8081
 
