@@ -3,3 +3,5 @@ built/
 node_modules/
 selenium/
 typings/
+
+npm-debug.log

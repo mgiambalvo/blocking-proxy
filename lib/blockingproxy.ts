@@ -13,7 +13,7 @@ var WAIT_FOR_ANGULAR_DATA = JSON.stringify({
  * JSON webdriver commands. It keeps track of whether the page under test
  * needs to wait for page stability, and initiates a wait if so.
  */
-export class StabilityProxy {
+export class BlockingProxy {
   seleniumAddress: string;
   stabilityEnabled: boolean;
   server: http.Server;
@@ -51,7 +51,7 @@ export class StabilityProxy {
         return false;
       }
 
-      if (StabilityProxy.isProxyCommand(commandPath)) {
+      if (BlockingProxy.isProxyCommand(commandPath)) {
         return false;
       }
 
@@ -144,7 +144,7 @@ export class StabilityProxy {
       console.log('Waiting for stability...', originalRequest.url);
 
       var stabilityRequest = self.createSeleniumRequest(
-          'POST', StabilityProxy.executeAsyncUrl(originalRequest.url),
+          'POST', BlockingProxy.executeAsyncUrl(originalRequest.url),
           function(stabilityResponse) {
             // TODO - If the response is that angular is not available on the page,
             // should we
@@ -181,7 +181,7 @@ export class StabilityProxy {
       var self = this;
       var stabilized = q(null);
 
-      if (StabilityProxy.isProxyCommand(originalRequest.url)) {
+      if (BlockingProxy.isProxyCommand(originalRequest.url)) {
         self.handleProxyCommand(originalRequest, "", response);
         return;
       }
@@ -212,7 +212,7 @@ export class StabilityProxy {
     }
 
     listen(port: number) {
-      console.log('Stability proxy listening on port ' + port);
+      console.log('Blocking proxy listening on port ' + port);
       this.server.listen(port);
     }
 
