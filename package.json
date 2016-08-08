@@ -34,6 +34,9 @@
     "url": "git://github.com/angular/jasminewd.git"
   },
   "main": "index.js",
+  "bin": {
+    "blocking-proxy": "built/lib/bin.js"
+  },
   "scripts": {
     "pretest": "node_modules/.bin/jshint index.js lib spec",
     "start": "node index.js",
