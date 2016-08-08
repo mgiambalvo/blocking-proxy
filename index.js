@@ -3,7 +3,7 @@
  * and the selenium server.
  */
 
-var StabilityProxy = require('./built/lib/stabilityproxy').StabilityProxy;
+var BlockingProxy = require('./built/lib/blockingproxy').BlockingProxy;
 
-var proxy = new StabilityProxy();
+var proxy = new BlockingProxy();
 proxy.listen(8111);
