@@ -13,7 +13,8 @@
   "dependencies": {
     "optimist": "~0.6.0",
     "q": "1.4.1",
-    "typings": "^0.8.1"
+    "typings": "^0.8.1",
+    "webdriver-manager": "^1.0.1"
   },
   "devDependencies": {
     "body-parser": "1.14.2",
@@ -35,9 +36,10 @@
   "main": "index.js",
   "scripts": {
     "pretest": "node_modules/.bin/jshint index.js lib spec",
-    "start": "node testapp/scripts/web-server.js",
+    "start": "node index.js",
+    "testapp": "node testapp/scripts/web-server.js",
     "test": "gulp test",
-    "test-e2e": "gulp test-e2e"
+    "test:e2e": "gulp test:e2e"
   },
   "jshintConfig": {
     "esversion": 6
