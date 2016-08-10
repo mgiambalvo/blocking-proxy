@@ -1,9 +1,7 @@
 # TODO
 
- - Fix ng2 e2e tests
- - set up travis
- - pass the address to the webdriver server on the commandline
- - configuration via file
+ - read options from config file
+ - wait function from config file
  - custom commands to change behavior on the fly
   - enable/disable stability
   - change the stability function
@@ -12,6 +10,9 @@
   - Timeout
   - Behavior when it times out?
   - Logging level or log to file
+ - simplify running e2e tests 
+ - Fix ng2 e2e tests
+ - set up travis
  - Http vs https?
 
 Protractor needs to be able to start this in a separate process - it should
@@ -20,6 +21,7 @@ work with all the existing methods of starting up webdriver.
 Should pass up errors in a reasonable way.
 
 # Running e2e tests
+
 Start webdriver
 
     webdriver-manager update

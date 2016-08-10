@@ -18,10 +18,11 @@ export class BlockingProxy {
   stabilityEnabled: boolean;
   server: http.Server;
   
-  constructor() {
-    this.seleniumAddress = 'http://localhost:4444/wd/hub';
+  constructor(seleniumAddress) {
+    this.seleniumAddress = seleniumAddress;
     this.stabilityEnabled = true;
     this.server = http.createServer(this.requestListener.bind(this));
+
   }
 
     /**
