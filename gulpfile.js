@@ -23,7 +23,7 @@ gulp.task('webdriver:update', function(done) {
 });
 
 gulp.task('jslint', function(done) {
-  runSpawn(done, './node_modules/.bin/jshint', ['lib','spec', 'scripts']);
+  runSpawn(done, './node_modules/.bin/jshint', ['lib', 'spec']);
 });
 
 gulp.task('clang-check', function() {

@@ -1,13 +1,20 @@
 #!/usr/bin/env node
 
-var path = require('path');
+import {BlockingProxy} from './blockingproxy';
+import {processArgs, printHelp} from './config';
 
 /**
  * Starts up a proxy server which modifies calls between the test process
  * and the selenium server.
  */
 
-var BlockingProxy = require('./blockingproxy').BlockingProxy;
+const argv = processArgs(process.argv.slice(2));
 
-var proxy = new BlockingProxy();
-proxy.listen(8111);
+if (argv.help) {
+  printHelp()
+  process.exit(0);
+}
+
+const proxy = new BlockingProxy(argv.seleniumAddress);
+proxy.listen(argv.port);
+

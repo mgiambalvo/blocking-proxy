@@ -39,7 +39,7 @@
   },
   "scripts": {
     "pretest": "node_modules/.bin/jshint index.js lib spec",
-    "start": "node index.js",
+    "start": "node built/lib/bin.js",
     "testapp": "node testapp/scripts/web-server.js",
     "test": "gulp test",
     "test:e2e": "gulp test:e2e"
