@@ -19,15 +19,17 @@ gulp.task('built:copy', function() {
 });
 
 gulp.task('webdriver:update', function(done) {
-  runSpawn(done, 'bin/webdriver-manager', ['update']);
+  runSpawn(done, 'node', ['bin/webdriver-manager', 'update']);
 });
 
-gulp.task('jslint', function(done) {
-  runSpawn(done, './node_modules/.bin/jshint', ['lib', 'spec']);
+gulp.task('jshint', function(done) {
+  runSpawn(done, 'node', ['node_modules/jshint/bin/jshint', 'lib', 'spec', 'scripts',
+    '--exclude=lib/selenium-webdriver/**/*.js,spec/dependencyTest/*.js,' +
+    'spec/install/**/*.js']);
 });
 
 gulp.task('clang-check', function() {
-  return gulp.src(['src/**/*.ts'])
+  return gulp.src(['lib/**/*.ts'])
       .pipe(gulpFormat.checkFormat('file', clangFormat))
       .on('warning', function(e) {
     console.log(e);
@@ -35,15 +37,11 @@ gulp.task('clang-check', function() {
 });
 
 gulp.task('clang', function() {
-  return gulp.src(['src/**/*.ts'])
+  return gulp.src(['lib/**/*.ts'])
       .pipe(gulpFormat.format('file', clangFormat))
       .on('warning', function(e) {
     console.log(e);
   });
-});
-
-gulp.task('typings', function(done) {
-  runSpawn(done, 'node_modules/.bin/typings', ['install']);
 });
 
 gulp.task('tsc', function(done) {
@@ -51,12 +49,12 @@ gulp.task('tsc', function(done) {
 });
 
 gulp.task('prepublish', function(done) {
-  runSequence(['typings', 'jslint', 'clang'],'tsc', 'built:copy', done);
+  runSequence(['jshint', 'clang'],'tsc', 'built:copy', done);
 });
 
 gulp.task('pretest', function(done) {
   runSequence(
-    ['webdriver:update', 'typings', 'jslint', 'clang'], 'tsc', 'built:copy', done);
+    ['webdriver:update', 'jshint', 'clang'], 'tsc', 'built:copy', done);
 });
 
 gulp.task('default', ['prepublish']);

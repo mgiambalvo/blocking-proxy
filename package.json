@@ -12,22 +12,21 @@
   "author": "Michael Giambalvo <heathkit@google.com>",
   "dependencies": {
     "optimist": "~0.6.0",
-    "q": "1.4.1",
-    "typings": "^0.8.1",
+    "typescript": "^2.0.2",
     "webdriver-manager": "^1.0.1"
   },
   "devDependencies": {
+    "@types/jasmine": "^2.2.33",
+    "@types/minimist": "^1.1.29",
+    "@types/node": "^6.0.45",
     "body-parser": "1.14.2",
     "clang-format": "^1.0.34",
     "express": "~4.13.3",
     "gulp": "^3.9.1",
     "gulp-clang-format": "^1.0.23",
-    "jshint": "2.9.1",
     "jasmine": "2.3.2",
-    "selenium-webdriver": "2.48.2",
-    "typescript": "~1.8.0",
-    "run-sequence": "^1.1.5",
-    "webdriver-manager": "~1.0.0"
+    "jshint": "2.9.1",
+    "webdriver-manager": "^1.0.1"
   },
   "repository": {
     "type": "git",
@@ -38,7 +37,7 @@
     "blocking-proxy": "built/lib/bin.js"
   },
   "scripts": {
-    "pretest": "node_modules/.bin/jshint index.js lib spec",
+    "pretest": "gulp pretest",
     "start": "node built/lib/bin.js",
     "testapp": "node testapp/scripts/web-server.js",
     "test": "gulp test",
