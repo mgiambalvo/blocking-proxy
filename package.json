@@ -25,7 +25,9 @@
     "gulp": "^3.9.1",
     "gulp-clang-format": "^1.0.23",
     "jasmine": "2.3.2",
+    "jasmine-ts": "0.0.3",
     "jshint": "2.9.1",
+    "run-sequence": "^1.2.2",
     "webdriver-manager": "^1.0.1"
   },
   "repository": {
@@ -37,11 +39,10 @@
     "blocking-proxy": "built/lib/bin.js"
   },
   "scripts": {
-    "pretest": "gulp pretest",
     "start": "node built/lib/bin.js",
     "testapp": "node testapp/scripts/web-server.js",
-    "test": "gulp test",
-    "test:e2e": "gulp test:e2e"
+    "test": "jasmine-ts spec/unit/**/*.ts",
+    "test:e2e": "jasmine spec/e2e/**/*.js"
   },
   "jshintConfig": {
     "esversion": 6

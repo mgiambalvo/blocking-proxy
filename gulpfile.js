@@ -19,7 +19,7 @@ gulp.task('built:copy', function() {
 });
 
 gulp.task('webdriver:update', function(done) {
-  runSpawn(done, 'node', ['bin/webdriver-manager', 'update']);
+  runSpawn(done, 'webdriver-manager', ['update']);
 });
 
 gulp.task('jshint', function(done) {
@@ -63,18 +63,4 @@ gulp.task('build', ['prepublish']);
 gulp.task('test:copy', function(done) {
   return gulp.src(['spec/**/*','!spec/**/*.ts'])
       .pipe(gulp.dest('built/spec/'));
-});
-
-gulp.task('test', ['build', 'test:copy'], function(done) {
-  var opt_arg = [];
-  opt_arg.push('node_modules/jasmine/bin/jasmine.js');
-  opt_arg.push('JASMINE_CONFIG_PATH=spec/unit_config.json');
-  runSpawn(done, 'node', opt_arg);
-});
-
-gulp.task('test:e2e', ['build', 'test:copy'], function(done) {
-  var opt_arg = [];
-  opt_arg.push('node_modules/jasmine/bin/jasmine.js');
-  opt_arg.push('JASMINE_CONFIG_PATH=spec/e2e_config.json');
-  runSpawn(done, 'node', opt_arg);
 });
