@@ -3,7 +3,6 @@ var util = require('util');
 
 describe('synchronizing with slow pages', function() {
   beforeEach(function() {
-    console.log('getting main page');
     browser.ignoreSynchronization = true;
     browser.get('index.html#/async');
   });

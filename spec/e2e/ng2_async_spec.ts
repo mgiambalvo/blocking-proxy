@@ -1,7 +1,14 @@
-xdescribe('async angular2 application', function() {
+import {$, browser, by, element, protractor} from 'protractor';
+
+describe('async angular2 application', function() {
   var URL = '/ng2/#/async';
 
-  beforeEach(function() { browser.get(URL); });
+  beforeEach(() => {
+    // Need to not ignore sync on get() so that we do the bootstrapping.
+    browser.ignoreSynchronization = false;
+    browser.get(URL);
+    browser.ignoreSynchronization = true;
+  });
 
   it('should work with synchronous actions', function() {
     var increment = $('#increment');
@@ -22,19 +29,20 @@ xdescribe('async angular2 application', function() {
     expect(timeout.$('.val').getText()).toEqual('1');
   });
 
-  it('should turn off when ignoreSynchronization is true', function() {
+  // Need a way to make the proxy ignore sync
+  xit('should turn off when ignoreSynchronization is true', function() {
     var timeout = $('#delayedIncrement');
 
     // At this point, the async action is still pending, so the count should
     // still be 0.
     expect(timeout.$('.val').getText()).toEqual('0');
 
-    browser.ignoreSynchronization = true;
+    //browser.ignoreSynchronization = true;
 
     timeout.$('.action').click();
     timeout.$('.cancel').click();
 
-    browser.ignoreSynchronization = false;
+    //browser.ignoreSynchronization = false;
 
     // whenStable should be called since the async action is cancelled. The
     // count should still be 0;
@@ -61,7 +69,7 @@ xdescribe('async angular2 application', function() {
     });
 
     it('should wait for a series of periodic increments', function() {
-      var timeout = $('#periodicIncrement');
+      var timeout = $('#periodicIncrement_unzoned');
 
       // Waits for the val to count 2.
       var EC = protractor.ExpectedConditions;
