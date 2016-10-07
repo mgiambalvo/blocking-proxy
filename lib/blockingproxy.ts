@@ -4,7 +4,7 @@ import * as q from 'q';
 var angularWaits = require('./angular/wait.js');
 
 var WAIT_FOR_ANGULAR_DATA = JSON.stringify({
-  script : 'return (' + angularWaits.NG2_WAIT_FN + ').apply(null, arguments);',
+  script : 'return (' + angularWaits.NG_WAIT_FN + ').apply(null, arguments);',
   args : []
 });
 

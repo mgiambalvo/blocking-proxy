@@ -1,4 +1,4 @@
-var webdriver = require('selenium-webdriver');
+import {$, browser, by, element} from 'protractor';
 
 // Assumes that:
 // - a blocking proxy is running at port 8111
@@ -6,22 +6,21 @@ var webdriver = require('selenium-webdriver');
 // - the test application is running at port 8081
 
 describe('stability proxy', function() {
-  var driver = new webdriver.Builder()
-                   .usingServer('http://localhost:8111')
-                   .withCapabilities(webdriver.Capabilities.chrome())
-                   .build();
+  beforeAll(() => {
+    browser.ignoreSynchronization = true;
+    browser.get('index.html#/async');
+  })
 
-  afterAll(function(done) { driver.quit().then(done, done.fail); });
+  var driver = browser.driver;
 
   it('should get a page with Angular and wait for a slow action',
      function(done) {
        driver.manage().timeouts().setScriptTimeout(20000);
-       driver.get('http://localhost:8081/ng1/index.html#/async');
-       driver.findElement(webdriver.By.css('[ng-bind="slowHttpStatus"]'))
+       driver.findElement(by.css('[ng-bind="slowHttpStatus"]'))
            .getText()
            .then(function(text) { expect(text).toEqual('not started'); });
-       driver.findElement(webdriver.By.css('[ng-click="slowHttp()"]')).click();
-       driver.findElement(webdriver.By.css('[ng-bind="slowHttpStatus"]'))
+       driver.findElement(by.css('[ng-click="slowHttp()"]')).click();
+       driver.findElement(by.css('[ng-bind="slowHttpStatus"]'))
            .getText()
            .then(function(text) {
              expect(text).toEqual('done');
