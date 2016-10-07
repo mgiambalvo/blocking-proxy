@@ -17,4 +17,3 @@ if (argv.help) {
 
 const proxy = new BlockingProxy(argv.seleniumAddress);
 proxy.listen(argv.port);
-

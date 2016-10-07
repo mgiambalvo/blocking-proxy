@@ -3,26 +3,27 @@
 import * as minimist from 'minimist';
 
 export interface Argv {
-  help?:boolean
-  seleniumAddress?:string
-  port?:number
+  help?: boolean
+  seleniumAddress?: string
+  port?: number
 }
 
 const opts: minimist.Opts = {
-  boolean: ['help'],
-  string: ['port', 'seleniumAddress'],
-  alias: {
-    help: ['h'],
-    port: ['p'],
-    seleniumAddress: ['s'],
+  boolean : [ 'help' ],
+  string : [ 'port', 'seleniumAddress' ],
+  alias : {
+    help : [ 'h' ],
+    port : [ 'p' ],
+    seleniumAddress : [ 's' ],
   },
-  default: {
-    port: process.env.BP_PORT || 8111,
-    seleniumAddress: process.env.BP_SELENIUM_ADDRESS || 'http://localhost:4444/wd/hub'
+  default : {
+    port : process.env.BP_PORT || 8111,
+    seleniumAddress :
+        process.env.BP_SELENIUM_ADDRESS || 'http://localhost:4444/wd/hub'
   }
 };
 
-export function processArgs(argv:string[]) {
+export function processArgs(argv: string[]) {
   return minimist(argv, opts) as Argv;
 }
 
