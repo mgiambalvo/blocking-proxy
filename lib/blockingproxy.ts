@@ -1,6 +1,5 @@
 import * as http from 'http';
 import * as url from 'url';
-import * as q from 'q';
 var angularWaits = require('./angular/wait.js');
 
 var WAIT_FOR_ANGULAR_DATA = JSON.stringify({
@@ -17,7 +16,7 @@ export class BlockingProxy {
   seleniumAddress: string;
   stabilityEnabled: boolean;
   server: http.Server;
-  
+
   constructor(seleniumAddress) {
     this.seleniumAddress = seleniumAddress;
     this.stabilityEnabled = true;
@@ -68,9 +67,9 @@ export class BlockingProxy {
     }
 
     var commandsToWaitFor = [
-      'screenshot', 'source', 'title', 'element',
-      'elements', 'keys', 'moveto', 'click', 'buttondown', 'buttonup',
-      'doubleclick', 'touch'
+      'executeScript', 'screenshot', 'source', 'title', 'element', 'elements',
+      'keys', 'moveto', 'click', 'buttondown', 'buttonup', 'doubleclick',
+      'touch', 'get'
     ];
 
     if (commandsToWaitFor.indexOf(parts[3]) != -1) {
@@ -80,8 +79,9 @@ export class BlockingProxy {
   }
 
   /**
-   * Creates a request to forward to the Selenium server. The request stream will
-   * not be ended - the user will need to write any data and then call `.end`.
+   * Creates a request to forward to the Selenium server. The request stream
+   * will not be ended - the user will need to write any data and then call
+   * `.end`.
    *
    * @param {string} method
    * @param {string} messageUrl
@@ -141,45 +141,48 @@ export class BlockingProxy {
 
   sendRequestToStabilize(originalRequest) {
     var self = this;
-    var deferred = q.defer();
     console.log('Waiting for stability...', originalRequest.url);
+    var deferred = new Promise((resolve, reject) => {
+      var stabilityRequest = self.createSeleniumRequest(
+          'POST', BlockingProxy.executeAsyncUrl(originalRequest.url),
+          function(stabilityResponse) {
+            // TODO - If the response is that angular is not available on the
+            // page,
+            // should we just go ahead and continue?
+            let stabilityData = '';
+            stabilityResponse.on('data',
+                                 function(data) { stabilityData += data; });
 
-    var stabilityRequest = self.createSeleniumRequest(
-        'POST', BlockingProxy.executeAsyncUrl(originalRequest.url),
-        function(stabilityResponse) {
-          // TODO - If the response is that angular is not available on the page,
-          // should we just go ahead and continue?
-          let stabilityData = '';
-          stabilityResponse.on('data', function(data) { stabilityData += data; });
+            stabilityResponse.on('error', function(err) {
+              console.log(err);
+              reject(err);
+            });
 
-          stabilityResponse.on('error', function(err) {
-            console.log(err);
-            deferred.reject(err);
+            stabilityResponse.on('end', function() {
+              var value = JSON.parse(stabilityData).value;
+              if (value) {
+                // waitForAngular only returns a value if there was an error
+                // in the browser.
+                value = 'Error while waiting for page to stabilize: ' + value;
+                console.log(value);
+                reject(value);
+                return;
+              }
+              console.log('Stabilized');
+              resolve();
+            });
           });
+      stabilityRequest.write(WAIT_FOR_ANGULAR_DATA);
+      stabilityRequest.end();
+    });
 
-          stabilityResponse.on('end', function() {
-            var value = JSON.parse(stabilityData).value;
-            if (value) {
-              // waitForAngular only returns a value if there was an error
-              // in the browser.
-              value = 'Error while waiting for page to stabilize: ' + value;
-              console.log(value);
-              deferred.reject(value);
-              return;
-            }
-            console.log('Stabilized');
-            deferred.resolve();
-          });
-        });
-    stabilityRequest.write(WAIT_FOR_ANGULAR_DATA);
-    stabilityRequest.end();
-
-    return deferred.promise;
+    return deferred;
   }
 
-  requestListener(originalRequest: http.IncomingMessage, response: http.ServerResponse) {
+  requestListener(originalRequest: http.IncomingMessage,
+                  response: http.ServerResponse) {
     var self = this;
-    var stabilized = q(null);
+    var stabilized = new Promise(() => {});
 
     if (BlockingProxy.isProxyCommand(originalRequest.url)) {
       self.handleProxyCommand(originalRequest, "", response);
@@ -187,14 +190,14 @@ export class BlockingProxy {
     }
 
     // If the command is not a proxy command, it's a regular webdriver command.
-    console.log(originalRequest.url);
+    console.log('Req: ' + originalRequest.url);
 
     if (self.shouldStabilize(originalRequest.url)) {
       stabilized = self.sendRequestToStabilize(originalRequest);
     }
 
     stabilized.then(
-        function() {
+        () => {
           var seleniumRequest = self.createSeleniumRequest(
               originalRequest.method, originalRequest.url,
               function(seleniumResponse) {
@@ -204,7 +207,7 @@ export class BlockingProxy {
               });
           originalRequest.pipe(seleniumRequest);
         },
-        function(err) {
+        (err) => {
           response.writeHead(500);
           response.write(err);
           response.end();
@@ -215,6 +218,4 @@ export class BlockingProxy {
     console.log('Blocking proxy listening on port ' + port);
     this.server.listen(port);
   }
-
 }
-
