@@ -2,10 +2,11 @@
 
 import * as minimist from 'minimist';
 
-export interface Argv {
+export interface Config {
   help?: boolean
   seleniumAddress?: string
   port?: number
+  rootElement?: string
 }
 
 const opts: minimist.Opts = {
@@ -19,12 +20,13 @@ const opts: minimist.Opts = {
   default : {
     port : process.env.BP_PORT || 8111,
     seleniumAddress :
-        process.env.BP_SELENIUM_ADDRESS || 'http://localhost:4444/wd/hub'
+        process.env.BP_SELENIUM_ADDRESS || 'http://localhost:4444/wd/hub',
+    rootElement: 'body'
   }
 };
 
 export function processArgs(argv: string[]) {
-  return minimist(argv, opts) as Argv;
+  return minimist(argv, opts) as Config;
 }
 
 export function printHelp() {
@@ -35,5 +37,6 @@ Options:
     --help, -h              Show help
     --port, -p              The port to listen on
     --selenumAddress, -s    The address of the selenium remote server to proxy
+    --rootElement           Element housing ng-app, if not html or body
 `)
 }

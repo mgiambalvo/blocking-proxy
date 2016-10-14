@@ -11,14 +11,17 @@
   ],
   "author": "Michael Giambalvo <heathkit@google.com>",
   "dependencies": {
+    "@types/es6-promise": "0.0.32",
+    "@types/minimist": "^1.1.29",
+    "@types/node": "^6.0.45",
+    "@types/selenium-webdriver": "~2.53.31",
+    "es6-promise": "^4.0.5",
     "optimist": "~0.6.0",
-    "typescript": "^2.0.2",
-    "webdriver-manager": "^1.0.1"
+    "selenium-webdriver": "2.53.3",
+    "typescript": "^2.0.0"
   },
   "devDependencies": {
     "@types/jasmine": "^2.2.33",
-    "@types/minimist": "^1.1.29",
-    "@types/node": "^6.0.45",
     "body-parser": "1.14.2",
     "clang-format": "^1.0.34",
     "gulp": "^3.9.1",
@@ -39,9 +42,8 @@
   "scripts": {
     "prepublish": "gulp prepublish",
     "start": "node built/lib/bin.js",
-    "testapp": "node testapp/scripts/web-server.js",
     "test": "jasmine-ts spec/unit/**/*.ts",
-    "test:e2e": "jasmine spec/e2e/**/*.js"
+    "test:e2e": "jasmine-ts spec/e2e/**/*.ts"
   },
   "jshintConfig": {
     "esversion": 6
