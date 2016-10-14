@@ -1,11 +1,8 @@
 import * as http from 'http';
 import * as url from 'url';
-var angularWaits = require('./angular/wait.js');
+import {Promise} from 'es6-promise';
 
-var WAIT_FOR_ANGULAR_DATA = JSON.stringify({
-  script : 'return (' + angularWaits.NG_WAIT_FN + ').apply(null, arguments);',
-  args : []
-});
+var angularWaits = require('./angular/wait.js');
 
 /**
  * The stability proxy is an http server responsible for intercepting
@@ -14,13 +11,25 @@ var WAIT_FOR_ANGULAR_DATA = JSON.stringify({
  */
 export class BlockingProxy {
   seleniumAddress: string;
+
+  // The ng-app root to use when waiting on the client.
+  rootElement: string;
   stabilityEnabled: boolean;
   server: http.Server;
 
-  constructor(seleniumAddress) {
+  constructor(seleniumAddress, rootElement) {
     this.seleniumAddress = seleniumAddress;
+    this.rootElement = rootElement || 'body';
     this.stabilityEnabled = true;
     this.server = http.createServer(this.requestListener.bind(this));
+  }
+
+  waitForAngularData() {
+    console.log(this.rootElement);
+    return JSON.stringify({
+      script : 'return (' + angularWaits.NG_WAIT_FN + ').apply(null, arguments);',
+      args : [this.rootElement]
+    });
   }
 
   /**
@@ -147,8 +156,7 @@ export class BlockingProxy {
           'POST', BlockingProxy.executeAsyncUrl(originalRequest.url),
           function(stabilityResponse) {
             // TODO - If the response is that angular is not available on the
-            // page,
-            // should we just go ahead and continue?
+            // page, should we just go ahead and continue?
             let stabilityData = '';
             stabilityResponse.on('data',
                                  function(data) { stabilityData += data; });
@@ -172,7 +180,7 @@ export class BlockingProxy {
               resolve();
             });
           });
-      stabilityRequest.write(WAIT_FOR_ANGULAR_DATA);
+      stabilityRequest.write(this.waitForAngularData());
       stabilityRequest.end();
     });
 
@@ -182,7 +190,7 @@ export class BlockingProxy {
   requestListener(originalRequest: http.IncomingMessage,
                   response: http.ServerResponse) {
     var self = this;
-    var stabilized = new Promise(() => {});
+    var stabilized = Promise.resolve(null);
 
     if (BlockingProxy.isProxyCommand(originalRequest.url)) {
       self.handleProxyCommand(originalRequest, "", response);

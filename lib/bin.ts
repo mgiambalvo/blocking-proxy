@@ -11,9 +11,9 @@ import {processArgs, printHelp} from './config';
 const argv = processArgs(process.argv.slice(2));
 
 if (argv.help) {
-  printHelp()
+  printHelp();
   process.exit(0);
 }
 
-const proxy = new BlockingProxy(argv.seleniumAddress);
+const proxy = new BlockingProxy(argv.seleniumAddress, argv.rootElement);
 proxy.listen(argv.port);
