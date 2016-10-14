@@ -18,7 +18,8 @@
     "es6-promise": "^4.0.5",
     "optimist": "~0.6.0",
     "selenium-webdriver": "2.53.3",
-    "typescript": "^2.0.0"
+    "typescript": "^2.0.3",
+    "webdriver-manager": "^10.2.2"
   },
   "devDependencies": {
     "@types/jasmine": "^2.2.33",
