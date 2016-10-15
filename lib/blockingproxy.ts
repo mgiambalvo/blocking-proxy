@@ -17,7 +17,7 @@ export class BlockingProxy {
   stabilityEnabled: boolean;
   server: http.Server;
 
-  constructor(seleniumAddress, rootElement) {
+  constructor(seleniumAddress, rootElement?) {
     this.seleniumAddress = seleniumAddress;
     this.rootElement = rootElement || 'body';
     this.stabilityEnabled = true;
@@ -117,9 +117,13 @@ export class BlockingProxy {
     switch (command) {
     case 'enabled':
       if (message.method === 'GET') {
-
+        response.writeHead(200);
+        response.write(JSON.stringify({value: this.stabilityEnabled}));
+        response.end();
       } else if (message.method === 'POST') {
-
+        response.writeHead(200);
+        this.stabilityEnabled = JSON.parse(data).value;
+        response.end();
       } else {
         response.writeHead(405);
         response.write('Invalid method');
@@ -193,7 +197,13 @@ export class BlockingProxy {
     var stabilized = Promise.resolve(null);
 
     if (BlockingProxy.isProxyCommand(originalRequest.url)) {
-      self.handleProxyCommand(originalRequest, "", response);
+      let commandData = '';
+      originalRequest.on('data', (d) => {
+        commandData += d;
+      });
+      originalRequest.on('end', () => {
+        self.handleProxyCommand(originalRequest, commandData, response);
+      })
       return;
     }
 
