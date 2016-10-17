@@ -10,16 +10,15 @@ describe('BlockingProxy Client', () => {
   beforeEach(() => {
     bp = new BlockingProxy('http://localhost:3111');
     bp.listen(BP_PORT);
-    client = new BPClient('localhost', BP_PORT);
+    client = new BPClient(`http://localhost:${BP_PORT}`);
   });
 
   it('should set synchronization', (done) => {
     expect(bp.stabilityEnabled).toBe(true);
 
     client.setSynchronization(false).then(() => {
-
-        expect(bp.stabilityEnabled).toBe(false);
-        done();
-      })
+      expect(bp.stabilityEnabled).toBe(false);
+      done();
+    });
   });
 });

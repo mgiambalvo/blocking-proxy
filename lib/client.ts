@@ -1,7 +1,15 @@
 import * as http from 'http';
+import * as url from 'url';
 
 export class BPClient {
-  constructor(private hostname: string, private port: number) {}
+  hostname: string;
+  port: number;
+
+  constructor(bpUrlValue: string) {
+    let bpUrl = url.parse(bpUrlValue);
+    this.hostname = bpUrl.hostname;
+    this.port = parseInt(bpUrl.port);
+  }
 
   setSynchronization(enabled: boolean) {
     return new Promise((resolve, reject) => {
