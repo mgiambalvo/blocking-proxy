@@ -37,7 +37,7 @@ gulp.task('clang-check', function() {
 });
 
 gulp.task('clang', function() {
-  return gulp.src(['lib/**/*.ts'])
+  return gulp.src(['lib/**/*.ts', 'spec/**/*.ts'])
       .pipe(gulpFormat.format('file', clangFormat))
       .on('warning', function(e) {
     console.log(e);
