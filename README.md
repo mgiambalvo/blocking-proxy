@@ -1,19 +1,12 @@
 # TODO
 
- - read options from config file
- - wait function from config file
- - custom commands to change behavior on the fly
-  - enable/disable stability
-  - change the stability function
-  - Root element for finding testability
-  - Whether or not to use All Angular2 roots
-  - Timeout
-  - Behavior when it times out?
-  - Logging level or log to file
+ - API commands
+  - Set stability function and args
  - simplify running e2e tests 
- - Fix ng2 e2e tests
  - set up travis
- - Http vs https?
+ - Timeout behavior
+ - proper propagation of errors
+ - Logging level or log to file
 
 Protractor needs to be able to start this in a separate process - it should
 work with all the existing methods of starting up webdriver.
