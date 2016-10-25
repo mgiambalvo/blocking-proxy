@@ -16,6 +16,7 @@ export class BlockingProxy {
   rootElement: string;
   stabilityEnabled: boolean;
   server: http.Server;
+  waitFunction = 'NG_WAIT_FN';
 
   constructor(seleniumAddress, rootElement?) {
     this.seleniumAddress = seleniumAddress;

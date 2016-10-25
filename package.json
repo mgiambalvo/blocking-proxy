@@ -44,6 +44,7 @@
     "prepublish": "gulp prepublish",
     "start": "node built/lib/bin.js",
     "test": "jasmine-ts spec/unit/**/*.ts",
+    "test:auto": "find lib spec | entr jasmine-ts spec/unit/**/*.ts",
     "test:e2e": "jasmine-ts spec/e2e/**/*.ts"
   },
   "jshintConfig": {
