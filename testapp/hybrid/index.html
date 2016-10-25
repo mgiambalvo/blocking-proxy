@@ -2,11 +2,15 @@
 <html>
   <head>
     <!-- Set the base href -->
-    <base href="/ng2/">
+    <base href="/hybrid/">
 
-    <title>Test App</title>
+    <title>Test ngUpgrade App</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,500,400italic,700" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="styles.css">
+    <script src="/ng1/lib/angular/angular.min.js"></script>
+    <script src="/ng1/lib/angular/angular-animate.min.js"></script>
+    <script src="/ng1/lib/angular/angular-route.min.js"></script>
+
     <!-- IE required polyfills, in this exact order -->
     <script src="../node_modules/core-js/client/shim.min.js"></script>
     <script src="../node_modules/reflect-metadata/Reflect.js"></script>
@@ -15,10 +19,10 @@
     <script src="../node_modules/zone.js/dist/zone.js"></script>
 
     <script>
-      System.import('system-config.js').then(function() {
+      System.import('systemjs.config.js').then(function () {
         System.import('app/main');
       }).catch(function(err) {
-        console.log('error while importing');
+        console.log('error while importing:');
         console.log(err);
         console.log(err.stack);
       });
@@ -26,7 +30,7 @@
   </head>
 
   <body>
-    <my-app>loading...</my-app>
+    <my-app>Loading...</my-app>
   </body>
 
 </html>
