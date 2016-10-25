@@ -13,7 +13,8 @@ export class BlockingProxy {
   seleniumAddress: string;
 
   // The ng-app root to use when waiting on the client.
-  rootElement: string;
+  rootElement = '';
+  ng12hybrid = false;
   stabilityEnabled: boolean;
   server: http.Server;
 
@@ -25,10 +26,9 @@ export class BlockingProxy {
   }
 
   waitForAngularData() {
-    console.log(this.rootElement);
     return JSON.stringify({
       script : 'return (' + angularWaits.NG_WAIT_FN + ').apply(null, arguments);',
-      args : [this.rootElement]
+      args : [this.rootElement, this.ng12hybrid]
     });
   }
 
@@ -77,8 +77,8 @@ export class BlockingProxy {
 
     var commandsToWaitFor = [
       'executeScript', 'screenshot', 'source', 'title', 'element', 'elements',
-      'keys', 'moveto', 'click', 'buttondown', 'buttonup', 'doubleclick',
-      'touch', 'get'
+      'execute', 'keys', 'moveto', 'click', 'buttondown', 'buttonup',
+      'doubleclick', 'touch', 'get'
     ];
 
     if (commandsToWaitFor.indexOf(parts[3]) != -1) {
@@ -162,21 +162,20 @@ export class BlockingProxy {
             // TODO - If the response is that angular is not available on the
             // page, should we just go ahead and continue?
             let stabilityData = '';
-            stabilityResponse.on('data',
-                                 function(data) { stabilityData += data; });
+            stabilityResponse.on('data', (data) => { stabilityData += data; });
 
-            stabilityResponse.on('error', function(err) {
+            stabilityResponse.on('error', (err) => {
               console.log(err);
               reject(err);
             });
 
-            stabilityResponse.on('end', function() {
+            stabilityResponse.on('end', () => {
               var value = JSON.parse(stabilityData).value;
               if (value) {
                 // waitForAngular only returns a value if there was an error
                 // in the browser.
-                value = 'Error while waiting for page to stabilize: ' + value;
-                console.log(value);
+                // TODO(heathkit): Extract more useful information from webdriver errors.
+                console.log('Error while waiting for page to stabilize: ', value['localizedMessage']);
                 reject(value);
                 return;
               }
@@ -235,5 +234,11 @@ export class BlockingProxy {
   listen(port: number) {
     console.log('Blocking proxy listening on port ' + port);
     this.server.listen(port);
+  }
+
+  quit() {
+    return new Promise((resolve) => {
+      this.server.close(resolve);
+    });
   }
 }
