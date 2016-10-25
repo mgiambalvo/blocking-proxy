@@ -9,16 +9,24 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var core_1 = require('@angular/core');
-var HomeComponent = (function () {
-    function HomeComponent() {
+var Ng2Component = (function () {
+    function Ng2Component() {
+        var _this = this;
+        this.callCount = 0;
+        this.clickButton = function () {
+            setTimeout(function () {
+                _this.callCount++;
+            }, 1000);
+        };
     }
-    HomeComponent = __decorate([
+    Ng2Component = __decorate([
         core_1.Component({
-            templateUrl: 'app/home/home.component.html'
+            selector: 'ng2',
+            templateUrl: './html/ng2.html'
         }), 
         __metadata('design:paramtypes', [])
-    ], HomeComponent);
-    return HomeComponent;
+    ], Ng2Component);
+    return Ng2Component;
 }());
-exports.HomeComponent = HomeComponent;
-//# sourceMappingURL=home.component.js.map
+exports.Ng2Component = Ng2Component;
+//# sourceMappingURL=ng2.js.map
