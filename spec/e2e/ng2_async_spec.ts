@@ -3,9 +3,7 @@ import {$, browser, by, element, protractor} from 'protractor';
 describe('async angular2 application', function() {
   var URL = '/ng2/#/async';
 
-  beforeEach(() => {
-    // Need to not ignore sync on get() so that we do the bootstrapping.
-    browser.ignoreSynchronization = false;
+  beforeEach(function() {
     browser.get(URL);
     browser.ignoreSynchronization = true;
   });
