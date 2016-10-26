@@ -1,4 +1,5 @@
 test:
   override:
+    - gulp lint
     - npm test
     - npm test:e2e
