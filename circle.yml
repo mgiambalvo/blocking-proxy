@@ -1,5 +1,13 @@
+dependencies: 
+  post:
+    - ./node_modules/.bin/webdriver-manager update
+    - ./node_modules/.bin/webdriver-manager start:
+          background: true
+    - npm run install_testapp
+    - npm run testapp:
+          background: true
 test:
   override:
     - gulp lint
     - npm test
-    - npm test:e2e
+    - npm run test:e2e
