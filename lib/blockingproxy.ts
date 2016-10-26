@@ -1,6 +1,6 @@
+import {Promise} from 'es6-promise';
 import * as http from 'http';
 import * as url from 'url';
-import {Promise} from 'es6-promise';
 
 var angularWaits = require('./angular/wait.js');
 
@@ -27,8 +27,9 @@ export class BlockingProxy {
 
   waitForAngularData() {
     return JSON.stringify({
-      script : 'return (' + angularWaits.NG_WAIT_FN + ').apply(null, arguments);',
-      args : [this.rootElement, this.ng12hybrid]
+      script :
+          'return (' + angularWaits.NG_WAIT_FN + ').apply(null, arguments);',
+      args : [ this.rootElement, this.ng12hybrid ]
     });
   }
 
@@ -118,7 +119,7 @@ export class BlockingProxy {
     case 'enabled':
       if (message.method === 'GET') {
         response.writeHead(200);
-        response.write(JSON.stringify({value: this.stabilityEnabled}));
+        response.write(JSON.stringify({value : this.stabilityEnabled}));
         response.end();
       } else if (message.method === 'POST') {
         response.writeHead(200);
@@ -174,8 +175,10 @@ export class BlockingProxy {
               if (value) {
                 // waitForAngular only returns a value if there was an error
                 // in the browser.
-                // TODO(heathkit): Extract more useful information from webdriver errors.
-                console.log('Error while waiting for page to stabilize: ', value['localizedMessage']);
+                // TODO(heathkit): Extract more useful information from
+                // webdriver errors.
+                console.log('Error while waiting for page to stabilize: ',
+                            value['localizedMessage']);
                 reject(value);
                 return;
               }
@@ -197,12 +200,10 @@ export class BlockingProxy {
 
     if (BlockingProxy.isProxyCommand(originalRequest.url)) {
       let commandData = '';
-      originalRequest.on('data', (d) => {
-        commandData += d;
-      });
+      originalRequest.on('data', (d) => { commandData += d; });
       originalRequest.on('end', () => {
         self.handleProxyCommand(originalRequest, commandData, response);
-      })
+      });
       return;
     }
 
@@ -237,8 +238,6 @@ export class BlockingProxy {
   }
 
   quit() {
-    return new Promise((resolve) => {
-      this.server.close(resolve);
-    });
+    return new Promise((resolve) => { this.server.close(resolve); });
   }
 }
