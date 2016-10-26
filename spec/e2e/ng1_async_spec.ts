@@ -1,47 +1,19 @@
-import {BlockingProxy, BPClient} from '../../lib';
 import * as webdriver from 'selenium-webdriver';
+import {getTestEnv} from './environment';
 
 describe('ng1 synchronizing with slow pages', function() {
   let driver: webdriver.WebDriver;
-  let bp: BlockingProxy;
-  let client: BPClient;
 
-  const BP_PORT = 8111;
-  const BP_URL = `http://localhost:${BP_PORT}`;
-
-  beforeAll(() => {
-    let capabilities = webdriver.Capabilities.chrome();
-    driver = new webdriver.Builder()
-      .usingServer(BP_URL)
-      .withCapabilities(capabilities)
-      .build();
-    driver.manage().timeouts().setScriptTimeout(20000);
-
-    bp = new BlockingProxy('http://localhost:4444/wd/hub');
-    bp.listen(BP_PORT);
-
-    // TODO set the wait function and arguments.
-
-    client = new BPClient(BP_URL);
-  });
-
-  afterAll((done) => {
-    bp.quit().then(() => {
-      driver.quit();
-    }).then(done, done.fail);
-  });
+  beforeAll(() => { ({driver} = getTestEnv()); });
 
   beforeEach((done) => {
-    driver.get('http://localhost:8081/ng1/#/async').then(() => {
-      done();
-    });
+    driver.get('http://localhost:8081/ng1/#/async').then(done);
   });
 
   function expectText(selector, expectedText) {
     return driver.findElement(webdriver.By.css(selector))
-        .getText().then((text) => {
-      expect(text).toEqual(expectedText);
-    });
+        .getText()
+        .then((text) => { expect(text).toEqual(expectedText); });
   }
 
   function clickElement(selector) {
@@ -54,7 +26,8 @@ describe('ng1 synchronizing with slow pages', function() {
     clickElement('[ng-click="slowHttp()"]');
 
     expectText('[ng-bind="slowHttpStatus"]', 'done')
-        .then(done).thenCatch(done.fail);
+        .then(done)
+        .thenCatch(done.fail);
   }, 10000);
 
   it('waits for long javascript execution', (done) => {
@@ -63,7 +36,8 @@ describe('ng1 synchronizing with slow pages', function() {
     clickElement('[ng-click="slowFunction()"]');
 
     expectText('[ng-bind="slowFunctionStatus"]', 'done')
-        .then(done).thenCatch(done.fail);
+        .then(done)
+        .thenCatch(done.fail);
   }, 10000);
 
   it('DOES NOT wait for timeout', (done) => {
@@ -72,7 +46,8 @@ describe('ng1 synchronizing with slow pages', function() {
     clickElement('[ng-click="slowTimeout()"]');
 
     expectText('[ng-bind="slowTimeoutStatus"]', 'pending...')
-        .then(done).thenCatch(done.fail);
+        .then(done)
+        .thenCatch(done.fail);
   }, 10000);
 
   it('waits for $timeout', (done) => {
@@ -81,7 +56,8 @@ describe('ng1 synchronizing with slow pages', function() {
     clickElement('[ng-click="slowAngularTimeout()"]');
 
     expectText('[ng-bind="slowAngularTimeoutStatus"]', 'done')
-        .then(done).thenCatch(done.fail);
+        .then(done)
+        .thenCatch(done.fail);
   }, 10000);
 
   it('waits for $timeout then a promise', (done) => {
@@ -90,7 +66,8 @@ describe('ng1 synchronizing with slow pages', function() {
     clickElement('[ng-click="slowAngularTimeoutPromise()"]');
 
     expectText('[ng-bind="slowAngularTimeoutPromiseStatus"]', 'done')
-        .then(done).thenCatch(done.fail);
+        .then(done)
+        .thenCatch(done.fail);
   }, 10000);
 
   it('waits for long http call then a promise', (done) => {
@@ -99,7 +76,8 @@ describe('ng1 synchronizing with slow pages', function() {
     clickElement('[ng-click="slowHttpPromise()"]');
 
     expectText('[ng-bind="slowHttpPromiseStatus"]', 'done')
-        .then(done).thenCatch(done.fail);
+        .then(done)
+        .thenCatch(done.fail);
   }, 10000);
 
   it('waits for slow routing changes', (done) => {
@@ -107,11 +85,12 @@ describe('ng1 synchronizing with slow pages', function() {
 
     clickElement('[ng-click="routingChange()"]');
 
-
-    driver.getPageSource().then((source) => {
-      expect(source).toMatch('polling mechanism')
-      done();
-    }).thenCatch(done.fail);
+    driver.getPageSource()
+        .then((source) => {
+          expect(source).toMatch('polling mechanism')
+          done();
+        })
+        .thenCatch(done.fail);
   }, 10000);
 
   it('waits for slow ng-include templates to load', (done) => {
@@ -120,6 +99,7 @@ describe('ng1 synchronizing with slow pages', function() {
     clickElement('[ng-click="changeTemplateUrl()"]');
 
     expectText('.included', 'slow template contents')
-        .then(done).thenCatch(done.fail);
+        .then(done)
+        .thenCatch(done.fail);
   }, 10000);
 });
