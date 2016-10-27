@@ -27,9 +27,9 @@ export class BlockingProxy {
 
   waitForAngularData() {
     return JSON.stringify({
-      script :
+      script:
           'return (' + angularWaits.NG_WAIT_FN + ').apply(null, arguments);',
-      args : [ this.rootElement, this.ng12hybrid ]
+      args: [this.rootElement, this.ng12hybrid]
     });
   }
 
@@ -47,7 +47,7 @@ export class BlockingProxy {
    */
   static executeAsyncUrl(originalUrl: string) {
     var parts = originalUrl.split('/');
-    return [ parts[0], parts[1], parts[2], 'execute_async' ].join('/');
+    return [parts[0], parts[1], parts[2], 'execute_async'].join('/');
   }
 
   /**
@@ -116,40 +116,40 @@ export class BlockingProxy {
     console.log('Got message: ' + message.url);
     var command = message.url.split('/')[2];
     switch (command) {
-    case 'enabled':
-      if (message.method === 'GET') {
-        response.writeHead(200);
-        response.write(JSON.stringify({value : this.stabilityEnabled}));
+      case 'enabled':
+        if (message.method === 'GET') {
+          response.writeHead(200);
+          response.write(JSON.stringify({value: this.stabilityEnabled}));
+          response.end();
+        } else if (message.method === 'POST') {
+          response.writeHead(200);
+          this.stabilityEnabled = JSON.parse(data).value;
+          response.end();
+        } else {
+          response.writeHead(405);
+          response.write('Invalid method');
+          response.end();
+        }
+        break;
+      case 'selenium_address':
+        if (message.method === 'GET') {
+          response.writeHead(200);
+          response.write(JSON.stringify({value: this.seleniumAddress}));
+          response.end();
+        } else if (message.method === 'POST') {
+          response.writeHead(200);
+          this.seleniumAddress = JSON.parse(data).value;
+          response.end();
+        } else {
+          response.writeHead(405);
+          response.write('Invalid method');
+          response.end();
+        }
+        break;
+      default:
+        response.writeHead(404);
+        response.write('Unknown stabilizer proxy command');
         response.end();
-      } else if (message.method === 'POST') {
-        response.writeHead(200);
-        this.stabilityEnabled = JSON.parse(data).value;
-        response.end();
-      } else {
-        response.writeHead(405);
-        response.write('Invalid method');
-        response.end();
-      }
-      break;
-    case 'selenium_address':
-      if (message.method === 'GET') {
-        response.writeHead(200);
-        response.write(JSON.stringify({value : this.seleniumAddress}));
-        response.end();
-      } else if (message.method === 'POST') {
-        response.writeHead(200);
-        this.seleniumAddress = JSON.parse(data).value;
-        response.end();
-      } else {
-        response.writeHead(405);
-        response.write('Invalid method');
-        response.end();
-      }
-      break;
-    default:
-      response.writeHead(404);
-      response.write('Unknown stabilizer proxy command');
-      response.end();
     }
   }
 
@@ -163,7 +163,9 @@ export class BlockingProxy {
             // TODO - If the response is that angular is not available on the
             // page, should we just go ahead and continue?
             let stabilityData = '';
-            stabilityResponse.on('data', (data) => { stabilityData += data; });
+            stabilityResponse.on('data', (data) => {
+              stabilityData += data;
+            });
 
             stabilityResponse.on('error', (err) => {
               console.log(err);
@@ -177,8 +179,9 @@ export class BlockingProxy {
                 // in the browser.
                 // TODO(heathkit): Extract more useful information from
                 // webdriver errors.
-                console.log('Error while waiting for page to stabilize: ',
-                            value['localizedMessage']);
+                console.log(
+                    'Error while waiting for page to stabilize: ',
+                    value['localizedMessage']);
                 reject(value);
                 return;
               }
@@ -193,14 +196,16 @@ export class BlockingProxy {
     return deferred;
   }
 
-  requestListener(originalRequest: http.IncomingMessage,
-                  response: http.ServerResponse) {
+  requestListener(
+      originalRequest: http.IncomingMessage, response: http.ServerResponse) {
     var self = this;
     var stabilized = Promise.resolve(null);
 
     if (BlockingProxy.isProxyCommand(originalRequest.url)) {
       let commandData = '';
-      originalRequest.on('data', (d) => { commandData += d; });
+      originalRequest.on('data', (d) => {
+        commandData += d;
+      });
       originalRequest.on('end', () => {
         self.handleProxyCommand(originalRequest, commandData, response);
       });
@@ -219,8 +224,8 @@ export class BlockingProxy {
           var seleniumRequest = self.createSeleniumRequest(
               originalRequest.method, originalRequest.url,
               function(seleniumResponse) {
-                response.writeHead(seleniumResponse.statusCode,
-                                   seleniumResponse.headers);
+                response.writeHead(
+                    seleniumResponse.statusCode, seleniumResponse.headers);
                 seleniumResponse.pipe(response);
               });
           originalRequest.pipe(seleniumRequest);
@@ -238,6 +243,8 @@ export class BlockingProxy {
   }
 
   quit() {
-    return new Promise((resolve) => { this.server.close(resolve); });
+    return new Promise((resolve) => {
+      this.server.close(resolve);
+    });
   }
 }

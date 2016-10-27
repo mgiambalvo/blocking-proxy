@@ -4,7 +4,9 @@ import {getTestEnv} from './environment';
 describe('ng1 synchronizing with slow pages', function() {
   let driver: webdriver.WebDriver;
 
-  beforeAll(() => { ({driver} = getTestEnv()); });
+  beforeAll(() => {
+    ({driver} = getTestEnv());
+  });
 
   beforeEach((done) => {
     driver.get('http://localhost:8081/ng1/#/async').then(done);
@@ -13,7 +15,9 @@ describe('ng1 synchronizing with slow pages', function() {
   function expectText(selector, expectedText) {
     return driver.findElement(webdriver.By.css(selector))
         .getText()
-        .then((text) => { expect(text).toEqual(expectedText); });
+        .then((text) => {
+          expect(text).toEqual(expectedText);
+        });
   }
 
   function clickElement(selector) {

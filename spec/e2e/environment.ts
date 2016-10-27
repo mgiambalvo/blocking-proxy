@@ -10,7 +10,9 @@ let driver: webdriver.WebDriver;
 let bp: BlockingProxy;
 let client: BPClient;
 
-export function getTestEnv() { return {driver, bp, client}; }
+export function getTestEnv() {
+  return {driver, bp, client};
+}
 
 beforeAll(() => {
   bp = new BlockingProxy(WD_URL);
@@ -26,4 +28,6 @@ beforeAll(() => {
   client = new BPClient(BP_URL);
 });
 
-afterAll((done) => { driver.quit().then(done, done.fail); });
+afterAll((done) => {
+  driver.quit().then(done, done.fail);
+});
