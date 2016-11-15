@@ -27,8 +27,7 @@ export class BlockingProxy {
 
   waitForAngularData() {
     return JSON.stringify({
-      script:
-          'return (' + angularWaits.NG_WAIT_FN + ').apply(null, arguments);',
+      script: 'return (' + angularWaits.NG_WAIT_FN + ').apply(null, arguments);',
       args: [this.rootElement, this.ng12hybrid]
     });
   }
@@ -77,9 +76,8 @@ export class BlockingProxy {
     }
 
     var commandsToWaitFor = [
-      'executeScript', 'screenshot', 'source', 'title', 'element', 'elements',
-      'execute', 'keys', 'moveto', 'click', 'buttondown', 'buttonup',
-      'doubleclick', 'touch', 'get'
+      'executeScript', 'screenshot', 'source', 'title', 'element', 'elements', 'execute', 'keys',
+      'moveto', 'click', 'buttondown', 'buttonup', 'doubleclick', 'touch', 'get'
     ];
 
     if (commandsToWaitFor.indexOf(parts[3]) != -1) {
@@ -158,8 +156,7 @@ export class BlockingProxy {
     console.log('Waiting for stability...', originalRequest.url);
     var deferred = new Promise((resolve, reject) => {
       var stabilityRequest = self.createSeleniumRequest(
-          'POST', BlockingProxy.executeAsyncUrl(originalRequest.url),
-          function(stabilityResponse) {
+          'POST', BlockingProxy.executeAsyncUrl(originalRequest.url), function(stabilityResponse) {
             // TODO - If the response is that angular is not available on the
             // page, should we just go ahead and continue?
             let stabilityData = '';
@@ -180,8 +177,7 @@ export class BlockingProxy {
                 // TODO(heathkit): Extract more useful information from
                 // webdriver errors.
                 console.log(
-                    'Error while waiting for page to stabilize: ',
-                    value['localizedMessage']);
+                    'Error while waiting for page to stabilize: ', value['localizedMessage']);
                 reject(value);
                 return;
               }
@@ -196,8 +192,7 @@ export class BlockingProxy {
     return deferred;
   }
 
-  requestListener(
-      originalRequest: http.IncomingMessage, response: http.ServerResponse) {
+  requestListener(originalRequest: http.IncomingMessage, response: http.ServerResponse) {
     var self = this;
     var stabilized = Promise.resolve(null);
 
@@ -222,10 +217,8 @@ export class BlockingProxy {
     stabilized.then(
         () => {
           var seleniumRequest = self.createSeleniumRequest(
-              originalRequest.method, originalRequest.url,
-              function(seleniumResponse) {
-                response.writeHead(
-                    seleniumResponse.statusCode, seleniumResponse.headers);
+              originalRequest.method, originalRequest.url, function(seleniumResponse) {
+                response.writeHead(seleniumResponse.statusCode, seleniumResponse.headers);
                 seleniumResponse.pipe(response);
               });
           originalRequest.pipe(seleniumRequest);

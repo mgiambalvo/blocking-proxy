@@ -19,8 +19,7 @@ const opts: minimist.Opts = {
   },
   default: {
     port: process.env.BP_PORT || 8111,
-    seleniumAddress:
-        process.env.BP_SELENIUM_ADDRESS || 'http://localhost:4444/wd/hub',
+    seleniumAddress: process.env.BP_SELENIUM_ADDRESS || 'http://localhost:4444/wd/hub',
     rootElement: 'body'
   }
 };

@@ -19,10 +19,7 @@ beforeAll(() => {
   bp.listen(BP_PORT);
 
   let capabilities = webdriver.Capabilities.chrome();
-  driver = new webdriver.Builder()
-               .usingServer(BP_URL)
-               .withCapabilities(capabilities)
-               .build();
+  driver = new webdriver.Builder().usingServer(BP_URL).withCapabilities(capabilities).build();
   driver.manage().timeouts().setScriptTimeout(20000);
 
   client = new BPClient(BP_URL);
