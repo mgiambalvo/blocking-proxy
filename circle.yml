@@ -1,7 +1,6 @@
 dependencies:
   post:
-    - ./node_modules/.bin/webdriver-manager update
-    - ./node_modules/.bin/webdriver-manager start:
+    - npm run webdriver:
           background: true
     - npm run install_testapp
     - npm run testapp:

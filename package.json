@@ -42,6 +42,7 @@
   "scripts": {
     "prepublish": "gulp prepublish",
     "start": "node built/lib/bin.js",
+    "webdriver": "webdriver-manager update && webdriver-manager start",
     "test": "jasmine-ts spec/unit/**/*.ts",
     "test:auto": "find lib spec | entr jasmine-ts spec/unit/**/*.ts",
     "testapp": "cd testapp && npm start",
