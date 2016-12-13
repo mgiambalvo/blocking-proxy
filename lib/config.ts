@@ -3,10 +3,10 @@
 import * as minimist from 'minimist';
 
 export interface Config {
-  help?: boolean
-  seleniumAddress?: string
-  port?: number
-  rootElement?: string
+  help?: boolean;
+  seleniumAddress?: string;
+  port?: number;
+  rootElement?: string;
 }
 
 const opts: minimist.Opts = {
