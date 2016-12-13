@@ -11,6 +11,6 @@ dependencies:
           background: true
 test:
   override:
-    - gulp lint
+    - ./node_modules/.bin/gulp lint
     - npm test
     - npm run test:e2e
