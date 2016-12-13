@@ -30,7 +30,10 @@
     "jshint": "2.9.1",
     "run-sequence": "^1.2.2",
     "ts-node": "^1.3.0",
+    "tslint": "^4.0.2",
+    "tslint-eslint-rules": "^3.1.0",
     "typescript": "^2.0.3",
+    "vrsource-tslint-rules": "^0.14.1",
     "webdriver-manager": "^10.2.2"
   },
   "repository": {
@@ -47,7 +50,8 @@
     "test:auto": "find lib spec | entr jasmine-ts spec/unit/**/*.ts",
     "testapp": "cd testapp && npm start",
     "install_testapp": "cd testapp && npm install",
-    "test:e2e": "jasmine-ts spec/e2e/**/*.ts"
+    "test:e2e": "jasmine-ts spec/e2e/**/*.ts",
+    "lint": "tslint spec/**/*.ts lib/**/*.ts"
   },
   "jshintConfig": {
     "esversion": 6
