@@ -142,7 +142,7 @@ export class BlockingProxy {
   handleProxyCommand(message, data, response) {
     let command = message.url.split('/')[2];
     switch (command) {
-      case 'enabled':
+      case 'waitEnabled':
         if (message.method === 'GET') {
           response.writeHead(200);
           response.write(JSON.stringify({value: this.waitEnabled}));
@@ -150,6 +150,21 @@ export class BlockingProxy {
         } else if (message.method === 'POST') {
           response.writeHead(200);
           this.waitEnabled = JSON.parse(data).value;
+          response.end();
+        } else {
+          response.writeHead(405);
+          response.write('Invalid method');
+          response.end();
+        }
+        break;
+      case 'waitParams':
+        if (message.method === 'GET') {
+          response.writeHead(200);
+          response.write(JSON.stringify({rootSelector: this.rootSelector}));
+          response.end();
+        } else if (message.method === 'POST') {
+          response.writeHead(200);
+          this.rootSelector = JSON.parse(data).rootSelector;
           response.end();
         } else {
           response.writeHead(405);
