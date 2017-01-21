@@ -76,30 +76,34 @@ describe('WebDriver logger', () => {
     expect(logger.logName).not.toEqual(otherLogger.logName);
   });
 
-  it('logs session commands', async() => {
-    let session = await driver.getSession();
-    let shortSession = session.getId().slice(0, 6);
-    await driver.quit();
 
-    let log = logger.getLog();
-    expect(log[0]).toContain('Getting new "chrome" session');
-    expect(log[2]).toContain(`Deleting session ${shortSession}`);
-  });
 
-  it('logs url commands', async() => {
-    await driver.getCurrentUrl();
+  describe('logs', () => {
+    it('logs session commands', async() => {
+      let session = await driver.getSession();
+      let shortSession = session.getId().slice(0, 6);
+      await driver.quit();
 
-    let log = logger.getLog();
-    expect(log[1]).toContain('Navigating to http://example.com');
-    expect(log[2]).toContain('Getting current URL');
-  });
+      let log = logger.getLog();
+      expect(log[0]).toContain('Getting new "chrome" session');
+      expect(log[2]).toContain(`Deleting session ${shortSession}`);
+    });
 
-  it('logs the session ID', async() => {
-    let session = await driver.getSession();
-    let shortSession = session.getId().slice(0, 6);
+    it('logs url commands', async() => {
+      await driver.getCurrentUrl();
 
-    let log = logger.getLog();
-    expect(log[1]).toContain(shortSession);
+      let log = logger.getLog();
+      expect(log[1]).toContain('Navigating to http://example.com');
+      expect(log[2]).toContain('Getting current URL');
+    });
+
+    it('logs the session ID', async() => {
+      let session = await driver.getSession();
+      let shortSession = session.getId().slice(0, 6);
+
+      let log = logger.getLog();
+      expect(log[1]).toContain(shortSession);
+    });
   });
 
   afterAll(() => {
