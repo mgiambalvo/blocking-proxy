@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as stream from 'stream';
 
-import {CommandName, WebDriverCommand} from './webdriverCommands';
+import {CommandName, WebDriverCommand} from './webdriver_commands';
 
 // Generate a random 8 character ID to avoid collisions.
 function getLogId() {

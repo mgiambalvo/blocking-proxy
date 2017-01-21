@@ -1,8 +1,8 @@
 import * as http from 'http';
 import * as url from 'url';
 
-import {parseWebDriverCommand} from './webdriverCommands';
-import {WebDriverLogger} from './webdriverLogger';
+import {parseWebDriverCommand} from './webdriver_commands';
+import {WebDriverLogger} from './webdriver_logger';
 
 let angularWaits = require('./angular/wait.js');
 export const BP_PREFIX = 'bpproxy';
