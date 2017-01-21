@@ -1,5 +1,6 @@
 import * as http from 'http';
 import * as url from 'url';
+import {BP_PREFIX} from './blockingproxy';
 
 export class BPClient {
   hostname: string;
@@ -11,10 +12,10 @@ export class BPClient {
     this.port = parseInt(bpUrl.port);
   }
 
-  setSynchronization(enabled: boolean) {
+  setWaitEnabled(enabled: boolean) {
     return new Promise((resolve, reject) => {
       let options =
-          {host: this.hostname, port: this.port, method: 'POST', path: '/stabilize_proxy/enabled'};
+          {host: this.hostname, port: this.port, method: 'POST', path: `/${BP_PREFIX}/enabled`};
 
       let request = http.request(options, (response) => {
         response.on('data', () => {});
@@ -28,9 +29,9 @@ export class BPClient {
     });
   }
 
-  isSyncEnabled() {
+  isWaitEnabled() {
     return new Promise((res) => {
-      let options = {host: this.hostname, port: this.port, path: '/stabilize_proxy/enabled'};
+      let options = {host: this.hostname, port: this.port, path: `/${BP_PREFIX}/enabled`};
 
       http.get(options, (response) => {
         let body = '';
