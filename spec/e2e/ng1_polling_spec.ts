@@ -1,6 +1,8 @@
 import * as webdriver from 'selenium-webdriver';
+
+import {BlockingProxy} from '../../lib/blockingproxy';
+
 import {getTestEnv} from './environment';
-import {BlockingProxy} from "../../lib/blockingproxy";
 
 const By = webdriver.By;
 
