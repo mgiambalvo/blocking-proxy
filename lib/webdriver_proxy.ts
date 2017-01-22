@@ -42,41 +42,32 @@ export class WebDriverProxy {
       options.headers = originalRequest.headers;
 
       let forwardedRequest = http.request(options);
-      forwardedRequest
-          .on('response',
-              (seleniumResponse) => {
-                response.writeHead(seleniumResponse.statusCode, seleniumResponse.headers);
 
-                let respData = '';
-                seleniumResponse
-                    .on('data',
-                        (d) => {
-                          respData += d;
-                          response.write(d);
-                        })
-                    .on('end',
-                        () => {
-                          command.handleResponse(seleniumResponse.statusCode, respData);
-                          response.end();
-                        })
-                    .on('error', replyWithError);
-
-              })
-          .on('error', replyWithError);
-
+      // clang-format off
       let reqData = '';
-      originalRequest
-          .on('data',
-              (d) => {
-                reqData += d;
-                forwardedRequest.write(d);
-              })
-          .on('end',
-              () => {
-                command.handleData(reqData);
-                forwardedRequest.end();
-              })
-          .on('error', replyWithError);
+      originalRequest.on('data', (d) => {
+        reqData += d;
+        forwardedRequest.write(d);
+      }).on('end', () => {
+        command.handleData(reqData);
+        forwardedRequest.end();
+      }).on('error', replyWithError);
+
+      forwardedRequest.on('response', (seleniumResponse) => {
+        response.writeHead(seleniumResponse.statusCode, seleniumResponse.headers);
+
+        let respData = '';
+        seleniumResponse.on('data', (d) => {
+          respData += d;
+          response.write(d);
+        }).on('end', () => {
+          command.handleResponse(seleniumResponse.statusCode, respData);
+          response.end();
+        }).on('error', replyWithError);
+
+      }).on('error', replyWithError);
+      // clang-format on
+
     }, replyWithError);
   }
 }
