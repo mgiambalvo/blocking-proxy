@@ -1,10 +1,9 @@
 import * as http from 'http';
 import * as url from 'url';
 
-import {parseWebDriverCommand} from './webdriver_commands';
+import {WebDriverCommand} from './webdriver_commands';
 import {WebDriverLogger} from './webdriver_logger';
-import {WebDriverBarrier, WebDriverProxy} from "./webdriver_proxy";
-import {WebDriverCommand} from "./webdriver_commands";
+import {WebDriverBarrier, WebDriverProxy} from './webdriver_proxy';
 
 let angularWaits = require('./angular/wait.js');
 export const BP_PREFIX = 'bpproxy';
@@ -199,10 +198,9 @@ export class BlockingProxy implements WebDriverBarrier {
     }
   }
 
-  sendRequestToStabilize(url: string) {
-    let self = this;
-    let deferred = new Promise((resolve, reject) => {
-      let stabilityRequest = self.createSeleniumRequest(
+  sendRequestToStabilize(url: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      let stabilityRequest = this.createSeleniumRequest(
           'POST', BlockingProxy.executeAsyncUrl(url), function(stabilityResponse) {
             // TODO - If the response is that angular is not available on the
             // page, should we just go ahead and continue?
@@ -232,8 +230,6 @@ export class BlockingProxy implements WebDriverBarrier {
       stabilityRequest.write(this.waitForAngularData());
       stabilityRequest.end();
     });
-
-    return deferred;
   }
 
   requestListener(originalRequest: http.IncomingMessage, response: http.ServerResponse) {
@@ -252,16 +248,16 @@ export class BlockingProxy implements WebDriverBarrier {
   }
 
   onCommand(command: WebDriverCommand): Promise<void> {
-    let stabilized = Promise.resolve(null);
+    if (this.logger) {
+      command.on('data', () => {
+        this.logger.logWebDriverCommand(command);
+      });
+    }
 
     if (this.shouldStabilize(command.url)) {
-      stabilized = this.sendRequestToStabilize(command.url);
+      return this.sendRequestToStabilize(command.url);
     }
-    command.on('data', () => {
-      console.log('Got data', command);
-      this.logger.logWebDriverCommand(command);
-    });
-    return stabilized;
+    return Promise.resolve(null);
   }
 
   listen(port: number) {
@@ -276,4 +272,3 @@ export class BlockingProxy implements WebDriverBarrier {
     });
   }
 }
-

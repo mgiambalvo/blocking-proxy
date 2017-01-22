@@ -38,7 +38,7 @@ class InMemoryLogger extends WebDriverLogger {
   }
 }
 
-fdescribe('WebDriver logger', () => {
+describe('WebDriver logger', () => {
   let mockServer: Server<Session>;
   let driver: webdriver.WebDriver;
   let logger = new InMemoryLogger();
@@ -76,34 +76,30 @@ fdescribe('WebDriver logger', () => {
     expect(logger.logName).not.toEqual(otherLogger.logName);
   });
 
+  it('logs session commands', async() => {
+    let session = await driver.getSession();
+    let shortSession = session.getId().slice(0, 6);
+    await driver.quit();
 
+    let log = logger.getLog();
+    expect(log[0]).toContain('Getting new "chrome" session');
+    expect(log[2]).toContain(`Deleting session ${shortSession}`);
+  });
 
-  describe('logs', () => {
-    it('session commands', async() => {
-      let session = await driver.getSession();
-      let shortSession = session.getId().slice(0, 6);
-      await driver.quit();
+  it('logs url commands', async() => {
+    await driver.getCurrentUrl();
 
-      let log = logger.getLog();
-      expect(log[0]).toContain('Getting new "chrome" session');
-      expect(log[2]).toContain(`Deleting session ${shortSession}`);
-    });
+    let log = logger.getLog();
+    expect(log[1]).toContain('Navigating to http://example.com');
+    expect(log[2]).toContain('Getting current URL');
+  });
 
-    it('url commands', async() => {
-      await driver.getCurrentUrl();
+  it('logs the session ID', async() => {
+    let session = await driver.getSession();
+    let shortSession = session.getId().slice(0, 6);
 
-      let log = logger.getLog();
-      expect(log[1]).toContain('Navigating to http://example.com');
-      expect(log[2]).toContain('Getting current URL');
-    });
-
-    it('the session ID', async() => {
-      let session = await driver.getSession();
-      let shortSession = session.getId().slice(0, 6);
-
-      let log = logger.getLog();
-      expect(log[1]).toContain(shortSession);
-    });
+    let log = logger.getLog();
+    expect(log[1]).toContain(shortSession);
   });
 
   afterAll(() => {

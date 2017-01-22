@@ -1,8 +1,8 @@
 /**
  * Utilities for parsing WebDriver commands from HTTP Requests.
  */
-import * as http from 'http';
 import * as events from 'events';
+import * as http from 'http';
 
 type HttpMethod = 'GET'|'POST'|'DELETE';
 export type paramKey = 'sessionId' | 'elementId' | 'name' | 'propertyName';

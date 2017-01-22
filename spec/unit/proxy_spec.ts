@@ -6,8 +6,9 @@ describe('BlockingProxy', () => {
     expect(proxy.waitEnabled).toBe(true);
   });
 
-  it('should provide hooks when relaying commands', () => {
+  it('should provide hooks when relaying commands',
+     () => {
 
 
-  })
+     });
 });
