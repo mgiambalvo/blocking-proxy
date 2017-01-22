@@ -94,6 +94,13 @@ export class WebDriverCommand extends events.EventEmitter {
   responseStatus: number;
   responseData: number;
 
+  // All WebDriver commands have a session Id, except for two.
+  // NewSession will have a session Id in the data
+  // Status just doesn't
+  get sessionId(): string {
+    return this.getParam('sessionId');
+  }
+
   constructor(public commandName: CommandName, public url: string, params?) {
     super();
     this.params = params;

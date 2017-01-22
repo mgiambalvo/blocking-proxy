@@ -2,10 +2,9 @@ import * as http from 'http';
 import {Server} from 'selenium-mock';
 import * as webdriver from 'selenium-webdriver';
 
-import {WebDriverCommand} from '../../lib/webdriver_commands';
+import {WebDriverCommand, CommandName} from '../../lib/webdriver_commands';
 import {WebDriverBarrier, WebDriverProxy} from '../../lib/webdriver_proxy';
 import {getMockSelenium, Session} from '../helpers/mock_selenium';
-
 
 const capabilities = webdriver.Capabilities.chrome();
 
@@ -13,7 +12,12 @@ class TestBarrier implements WebDriverBarrier {
   commands: WebDriverCommand[] = [];
 
   onCommand(command: WebDriverCommand): Promise<void> {
-    return undefined;
+    this.commands.push(command);
+    return null;
+  }
+
+  getCommandNames() {
+    return this.commands.map((c) => c.commandName);
   }
 }
 
@@ -21,19 +25,23 @@ describe('WebDriver command parser', () => {
   let mockServer: Server<Session>;
   let driver: webdriver.WebDriver;
   let proxy: WebDriverProxy;
-  let bpPort: number;
   let server: http.Server;
+  let testBarrier: TestBarrier;
 
-  beforeAll(async() => {
+  beforeEach(async() => {
     mockServer = getMockSelenium();
     mockServer.start();
     let mockPort = mockServer.handle.address().port;
 
     proxy = new WebDriverProxy(`http://localhost:${mockPort}/wd/hub`);
+    testBarrier = new TestBarrier;
+    proxy.addBarrier(testBarrier);
     server = http.createServer(proxy.requestListener.bind(proxy));
+    server.listen(0);
+    let port = server.address().port;
 
     driver = new webdriver.Builder()
-                 .usingServer(`http://localhost:${bpPort}`)
+                 .usingServer(`http://localhost:${port}`)
                  .withCapabilities(capabilities)
                  .build();
 
@@ -41,15 +49,35 @@ describe('WebDriver command parser', () => {
     await driver.get('http://example.com');
   });
 
-  afterEach(() => {});
-
-  xit('handles session commands', async() => {
+  it('parses session commands', async() => {
     let session = await driver.getSession();
+    let sessionId = session.getId();
+    await driver.quit();
+
+    let recentCommands = testBarrier.getCommandNames();
+    expect(recentCommands.length).toBe(3);
+    expect(recentCommands).toEqual([
+        CommandName.NewSession,
+        CommandName.Go,
+        CommandName.DeleteSession
+    ]);
+    expect(testBarrier.commands[1].sessionId).toEqual(sessionId);
   });
 
-  xit('handles url commands', async() => {});
+  it('parses url commands', async() => {
+    await driver.getCurrentUrl();
 
-  afterAll(() => {
+    let recentCommands = testBarrier.getCommandNames();
+    expect(recentCommands.length).toBe(3);
+    expect(recentCommands).toEqual([
+      CommandName.NewSession,
+      CommandName.Go,
+      CommandName.GetCurrentURL
+    ]);
+  });
+
+  afterEach(() => {
+    server.close();
     mockServer.stop();
   });
 });
