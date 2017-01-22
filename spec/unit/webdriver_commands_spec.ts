@@ -1,31 +1,38 @@
 import {Server} from 'selenium-mock';
 import * as webdriver from 'selenium-webdriver';
 
-import {BlockingProxy} from '../../lib/blockingproxy';
 import {getMockSelenium, Session} from '../helpers/mock_selenium';
+import {WebDriverBarrier, WebDriverProxy} from "../../lib/webdriver_proxy";
+import * as http from 'http';
+import {WebDriverCommand} from "../../lib/webdriver_commands";
+
 
 const capabilities = webdriver.Capabilities.chrome();
 
-class TestBarrier implements WDBarrier {
+class TestBarrier implements WebDriverBarrier {
+  commands: WebDriverCommand[] = [];
 
+  onCommand(command: WebDriverCommand): Promise<void> {
+
+    return undefined;
+  }
 }
 
-describe('WebDriver logger', () => {
+describe('WebDriver command parser', () => {
   let mockServer: Server<Session>;
   let driver: webdriver.WebDriver;
-  let proxy: BlockingProxy;
+  let proxy: WebDriverProxy;
   let bpPort: number;
+  let server: http.Server;
 
-  beforeAll(() => {
+  beforeAll(async() => {
     mockServer = getMockSelenium();
     mockServer.start();
     let mockPort = mockServer.handle.address().port;
 
-    proxy = new BlockingProxy(`http://localhost:${mockPort}/wd/hub`);
-    bpPort = proxy.listen(0);
-  });
+    proxy = new WebDriverProxy(`http://localhost:${mockPort}/wd/hub`);
+    server = http.createServer(proxy.requestListener.bind(proxy));
 
-  beforeEach(async() => {
     driver = new webdriver.Builder()
         .usingServer(`http://localhost:${bpPort}`)
         .withCapabilities(capabilities)
@@ -38,18 +45,13 @@ describe('WebDriver logger', () => {
   afterEach(() => {
   });
 
-  it('parses session commands', async() => {
+  xit('handles session commands', async() => {
     let session = await driver.getSession();
 
 
   });
 
-  it('parses url commands', async() => {
-    await driver.getCurrentUrl();
-
-    let log = logger.getLog();
-    expect(log[1]).toContain('Navigating to http://example.com');
-    expect(log[2]).toContain('Getting current URL');
+  xit('handles url commands', async() => {
   });
 
   afterAll(() => {

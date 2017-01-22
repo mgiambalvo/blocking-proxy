@@ -38,7 +38,7 @@ class InMemoryLogger extends WebDriverLogger {
   }
 }
 
-describe('WebDriver logger', () => {
+fdescribe('WebDriver logger', () => {
   let mockServer: Server<Session>;
   let driver: webdriver.WebDriver;
   let logger = new InMemoryLogger();
@@ -79,7 +79,7 @@ describe('WebDriver logger', () => {
 
 
   describe('logs', () => {
-    it('logs session commands', async() => {
+    it('session commands', async() => {
       let session = await driver.getSession();
       let shortSession = session.getId().slice(0, 6);
       await driver.quit();
@@ -89,7 +89,7 @@ describe('WebDriver logger', () => {
       expect(log[2]).toContain(`Deleting session ${shortSession}`);
     });
 
-    it('logs url commands', async() => {
+    it('url commands', async() => {
       await driver.getCurrentUrl();
 
       let log = logger.getLog();
@@ -97,7 +97,7 @@ describe('WebDriver logger', () => {
       expect(log[2]).toContain('Getting current URL');
     });
 
-    it('logs the session ID', async() => {
+    it('the session ID', async() => {
       let session = await driver.getSession();
       let shortSession = session.getId().slice(0, 6);
 

@@ -1,6 +1,8 @@
 /**
  * Utilities for parsing WebDriver commands from HTTP Requests.
  */
+import * as http from 'http';
+import * as events from 'events';
 
 type HttpMethod = 'GET'|'POST'|'DELETE';
 export type paramKey = 'sessionId' | 'elementId' | 'name' | 'propertyName';
@@ -86,15 +88,32 @@ class Endpoint {
  * @param params Parameters for the command taken from the request's url.
  * @param data Optional data included with the command, taken from the body of the request.
  */
-export class WebDriverCommand {
+export class WebDriverCommand extends events.EventEmitter {
   private params: {[key: string]: string};
+  data: any;
+  responseStatus: number;
+  responseData: number;
 
-  constructor(public commandName: CommandName, params?, public data?: any) {
+  constructor(public commandName: CommandName, public url: string, params?) {
+    super();
     this.params = params;
   }
 
   public getParam(key: paramKey) {
     return this.params[key];
+  }
+
+  public handleData(data?: any) {
+    if (data) {
+      this.data = JSON.parse(data);
+    }
+    this.emit('data');
+  }
+
+  public handleResponse(statusCode: number, data?: any) {
+    this.responseStatus = statusCode;
+    this.responseData = data;
+    this.emit('response');
   }
 }
 
@@ -111,20 +130,15 @@ function addWebDriverCommand(command: CommandName, method: HttpMethod, pattern: 
 /**
  * Returns a new WebdriverCommand object for the resource at the given URL.
  */
-export function parseWebDriverCommand(url, method, data: string) {
-  let parsedData = {};
-  if (data) {
-    parsedData = JSON.parse(data);
-  }
-
+export function parseWebDriverCommand(url, method) {
   for (let endpoint of endpoints) {
     if (endpoint.matches(url, method)) {
       let params = endpoint.getParams(url);
-      return new WebDriverCommand(endpoint.name, params, parsedData);
+      return new WebDriverCommand(endpoint.name, url, params);
     }
   }
 
-  return new WebDriverCommand(CommandName.UNKNOWN, {}, {'url': url});
+  return new WebDriverCommand(CommandName.UNKNOWN, url, {});
 }
 
 let sessionPrefix = '/session/:sessionId';

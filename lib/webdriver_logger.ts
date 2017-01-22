@@ -56,6 +56,7 @@ export class WebDriverLogger {
     switch (command.commandName) {
       case CommandName.NewSession:
         let desired = command.data['desiredCapabilities'];
+        console.log(desired);
         return `Getting new "${desired['browserName']}" session`;
       case CommandName.DeleteSession:
         let sessionId = command.getParam('sessionId').slice(0, 6);

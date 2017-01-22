@@ -1,72 +1,81 @@
-import {parseWebDriverCommand} from './webdriverCommands';
+import {parseWebDriverCommand, WebDriverCommand} from './webdriver_commands';
+import * as http from 'http';
+import * as url from 'url';
 
 /**
  * A proxy that understands WebDriver commands. Users can add middleware (similar to middleware in
  * express) that will be called before
  * forwarding the request to WebDriver or forwarding the response to the client.
  */
-export class WebdriverProxy {
+export class WebDriverProxy {
+  barriers: WebDriverBarrier[];
+  seleniumAddress: string;
 
-  constructor() {
-
+  constructor(seleniumAddress: string) {
+    this.barriers = [];
+    this.seleniumAddress = seleniumAddress;
   }
 
-  addMiddleware(middleware: WebDriverMiddleware) {
-
+  addBarrier(barrier: WebDriverBarrier) {
+    this.barriers.push(barrier);
   }
 
-  requestListener(originalRequest: http.IncomingMessage, response: http.ServerResponse) {
+  async requestListener(originalRequest: http.IncomingMessage, response: http.ServerResponse) {
 
+    let command = parseWebDriverCommand(originalRequest.url, originalRequest.method);
 
-    let stabilized = Promise.resolve(null);
+    let reqData = '';
+    originalRequest.on('data', (d) => {
+      reqData += d;
+    });
+    originalRequest.on('end', () => {
+      command.handleData(reqData);
+    });
 
-    // If the command is not a proxy command, it's a regular webdriver command.
-    if (self.shouldStabilize(originalRequest.url)) {
-      stabilized = self.sendRequestToStabilize(originalRequest);
-
-      // TODO: Log waiting for Angular.
+    // TODO: What happens when barriers error? return a client error?
+    for (let barrier of this.barriers) {
+      await barrier.onCommand(command);
     }
 
-    stabilized.then(
-        () => {
-          let seleniumRequest = self.createSeleniumRequest(
-              originalRequest.method, originalRequest.url, function(seleniumResponse) {
-                response.writeHead(seleniumResponse.statusCode, seleniumResponse.headers);
-                seleniumResponse.pipe(response);
-                seleniumResponse.on('error', (err) => {
-                  response.writeHead(500);
-                  response.write(err);
-                  response.end();
-                });
-              });
-          let reqData = '';
-          originalRequest.on('error', (err) => {
-            response.writeHead(500);
-            response.write(err);
-            response.end();
-          });
-          originalRequest.on('data', (d) => {
-            reqData += d;
-            seleniumRequest.write(d);
-          });
-          originalRequest.on('end', () => {
-            let command =
-                parseWebDriverCommand(originalRequest.url, originalRequest.method, reqData);
-            if (this.logger) {
-              this.logger.logWebDriverCommand(command);
-            }
-            seleniumRequest.end();
-          });
-        },
-        (err) => {
-          response.writeHead(500);
-          response.write(err);
-          response.end();
-        });
+    let parsedUrl = url.parse(this.seleniumAddress);
+    let options: http.RequestOptions = {};
+    options.method = originalRequest.method;
+    options.path = parsedUrl.path + originalRequest.url;
+    options.hostname = parsedUrl.hostname;
+    options.port = parseInt(parsedUrl.port);
+    options.headers = originalRequest.rawHeaders;
+
+    originalRequest.on('error', (err) => {
+      response.writeHead(500);
+      response.end(err);
+    });
+
+    let forwardedRequest = http.request(options, (seleniumResponse) => {
+      response.writeHead(seleniumResponse.statusCode, seleniumResponse.headers);
+      let respData = '';
+      seleniumResponse.on('data', (d) => {
+        respData += d;
+        response.write(d);
+      });
+      seleniumResponse.on('end', () => {
+        command.handleResponse(seleniumResponse.statusCode, respData);
+        response.end();
+      });
+      seleniumResponse.on('error', (err) => {
+        response.writeHead(500);
+        response.end(err);
+      });
+    });
+
+    originalRequest.on('data', (d) => {
+      forwardedRequest.write(d);
+    });
+    originalRequest.on('end', () => {
+      forwardedRequest.end();
+    });
   }
 }
 
-export class WebDriverMiddleware {
-  onRequest() {
-  }
+export interface WebDriverBarrier {
+  onCommand(command: WebDriverCommand): Promise<void>;
 }

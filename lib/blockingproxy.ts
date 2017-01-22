@@ -3,6 +3,8 @@ import * as url from 'url';
 
 import {parseWebDriverCommand} from './webdriver_commands';
 import {WebDriverLogger} from './webdriver_logger';
+import {WebDriverBarrier, WebDriverProxy} from "./webdriver_proxy";
+import {WebDriverCommand} from "./webdriver_commands";
 
 let angularWaits = require('./angular/wait.js');
 export const BP_PREFIX = 'bpproxy';
@@ -12,7 +14,7 @@ export const BP_PREFIX = 'bpproxy';
  * JSON webdriver commands. It keeps track of whether the page under test
  * needs to wait for page stability, and initiates a wait if so.
  */
-export class BlockingProxy {
+export class BlockingProxy implements WebDriverBarrier {
   seleniumAddress: string;
 
   // The ng-app root to use when waiting on the client.
@@ -20,12 +22,15 @@ export class BlockingProxy {
   waitEnabled: boolean;
   server: http.Server;
   logger: WebDriverLogger;
+  private proxy: WebDriverProxy;
 
   constructor(seleniumAddress) {
     this.seleniumAddress = seleniumAddress;
     this.rootSelector = '';
     this.waitEnabled = true;
     this.server = http.createServer(this.requestListener.bind(this));
+    this.proxy = new WebDriverProxy(seleniumAddress);
+    this.proxy.addBarrier(this);
   }
 
   waitForAngularData() {
@@ -194,11 +199,11 @@ export class BlockingProxy {
     }
   }
 
-  sendRequestToStabilize(originalRequest) {
+  sendRequestToStabilize(url: string) {
     let self = this;
     let deferred = new Promise((resolve, reject) => {
       let stabilityRequest = self.createSeleniumRequest(
-          'POST', BlockingProxy.executeAsyncUrl(originalRequest.url), function(stabilityResponse) {
+          'POST', BlockingProxy.executeAsyncUrl(url), function(stabilityResponse) {
             // TODO - If the response is that angular is not available on the
             // page, should we just go ahead and continue?
             let stabilityData = '';
@@ -232,21 +237,31 @@ export class BlockingProxy {
   }
 
   requestListener(originalRequest: http.IncomingMessage, response: http.ServerResponse) {
-    let self = this;
-    let stabilized = Promise.resolve(null);
-
     if (BlockingProxy.isProxyCommand(originalRequest.url)) {
       let commandData = '';
       originalRequest.on('data', (d) => {
         commandData += d;
       });
       originalRequest.on('end', () => {
-        self.handleProxyCommand(originalRequest, commandData, response);
+        this.handleProxyCommand(originalRequest, commandData, response);
       });
       return;
     }
 
-    this.proxy.requestLister(originalRequest, response);
+    this.proxy.requestListener(originalRequest, response);
+  }
+
+  onCommand(command: WebDriverCommand): Promise<void> {
+    let stabilized = Promise.resolve(null);
+
+    if (this.shouldStabilize(command.url)) {
+      stabilized = this.sendRequestToStabilize(command.url);
+    }
+    command.on('data', () => {
+      console.log('Got data', command);
+      this.logger.logWebDriverCommand(command);
+    });
+    return stabilized;
   }
 
   listen(port: number) {
@@ -261,3 +276,4 @@ export class BlockingProxy {
     });
   }
 }
+
