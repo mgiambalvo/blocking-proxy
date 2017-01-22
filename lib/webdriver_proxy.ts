@@ -85,3 +85,4 @@ export class WebDriverProxy {
  * will not be forwarded to Selenium.
  */
 export interface WebDriverBarrier { onCommand(command: WebDriverCommand): Promise<void>; }
+
