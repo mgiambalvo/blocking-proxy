@@ -28,17 +28,19 @@ describe('WebDriver Proxy', () => {
       // Verify that all nock endpoints were called.
       expect(resp.writeHead.calls.first().args[0]).toBe(200);
       expect(data).toEqual(JSON.stringify(responseData));
-      scope.done();
+      scope.isDone();
       done();
     });
   });
 
   it('waits for barriers', (done) => {
+    const WD_URL = '/session/sessionId/url';
+
     let req = new InMemoryReader() as any;
     let resp = new InMemoryWriter() as any;
     resp.writeHead = jasmine.createSpy('spy');
-    req.url = '/session/sessionId/get';
-    req.method = 'GET';
+    req.url = WD_URL;
+    req.method = 'POST';
 
     let barrier = new TestBarrier();
     let barrierDone = false;
@@ -51,11 +53,18 @@ describe('WebDriver Proxy', () => {
       });
     };
 
+    let scope = nock(proxy.seleniumAddress).post(WD_URL).reply(() => {
+      // Shouldn't see the command until the barrier is done.
+      expect(barrierDone).toBeTruthy();
+      return [200];
+    });
+
     proxy.addBarrier(barrier);
     proxy.requestListener(req, resp);
 
     resp.onEnd(() => {
       expect(barrierDone).toBeTruthy();
+      scope.isDone();
       done();
     });
   });
@@ -76,7 +85,7 @@ describe('WebDriver Proxy', () => {
     barrier.onCommand = (command: WebDriverCommand): Promise<void> => {
       command.on('response', () => {
         expect(command.responseData['url']).toEqual(RESPONSE.url);
-        scope.done();
+        scope.isDone();
         done();
       });
       return undefined;
@@ -102,7 +111,7 @@ describe('WebDriver Proxy', () => {
     resp.onEnd((data) => {
       expect(resp.writeHead.calls.first().args[0]).toBe(500);
       expect(data).toEqual(ERR.toString());
-      scope.done();
+      scope.isDone();
       done();
     });
   });
