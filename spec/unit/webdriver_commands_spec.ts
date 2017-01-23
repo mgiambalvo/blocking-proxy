@@ -58,6 +58,13 @@ describe('WebDriver command parser', () => {
     ]);
   });
 
+  it('parses timeout commands', async() => {
+    await driver.manage().timeouts().setScriptTimeout(2468);
+
+    let recentCommands = testBarrier.getCommandNames();
+    expect(recentCommands[2]).toEqual(CommandName.SetTimeouts);
+  });
+
   afterEach(() => {
     server.close();
     mockServer.stop();

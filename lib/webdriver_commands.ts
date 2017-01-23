@@ -92,7 +92,7 @@ export class WebDriverCommand extends events.EventEmitter {
   private params: {[key: string]: string};
   data: any;
   responseStatus: number;
-  responseData: number;
+  responseData: any;
 
   // All WebDriver commands have a session Id, except for two.
   // NewSession will have a session Id in the data
@@ -120,7 +120,11 @@ export class WebDriverCommand extends events.EventEmitter {
   public handleResponse(statusCode: number, data?: any) {
     this.responseStatus = statusCode;
     if (data) {
-      this.responseData = JSON.parse(data);
+      if (typeof data != 'string') {
+        this.responseData = JSON.parse(data);
+      } else {
+        this.responseData = data;
+      }
     }
     this.emit('response');
   }
