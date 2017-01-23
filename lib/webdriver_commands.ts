@@ -120,11 +120,7 @@ export class WebDriverCommand extends events.EventEmitter {
   public handleResponse(statusCode: number, data?: any) {
     this.responseStatus = statusCode;
     if (data) {
-      if (typeof data != 'string') {
-        this.responseData = JSON.parse(data);
-      } else {
-        this.responseData = data;
-      }
+      this.responseData = data;
     }
     this.emit('response');
   }

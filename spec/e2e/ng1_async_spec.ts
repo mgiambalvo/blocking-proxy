@@ -13,7 +13,7 @@ describe('ng1 synchronizing with slow pages', () => {
   });
 
   async function expectText(selector, expectedText) {
-    let text = await driver.findElement(webdriver.By.css(selector)).getText()
+    let text = await driver.findElement(webdriver.By.css(selector)).getText();
     expect(text).toEqual(expectedText);
   }
 

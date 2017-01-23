@@ -69,6 +69,9 @@ export class WebDriverProxy {
         respData += d;
         response.write(d);
       }).on('end', () => {
+        if (seleniumResponse.headers['content-type'] == 'application/json') {
+          respData = JSON.parse(respData);
+        }
         command.handleResponse(seleniumResponse.statusCode, respData);
         response.end();
       }).on('error', replyWithError);
