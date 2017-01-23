@@ -22,7 +22,7 @@ describe('WebDriver command parser', () => {
     proxy = new WebDriverProxy(`http://localhost:${mockPort}/wd/hub`);
     testBarrier = new TestBarrier;
     proxy.addBarrier(testBarrier);
-    server = http.createServer(proxy.requestListener.bind(proxy));
+    server = http.createServer(proxy.handleRequest.bind(proxy));
     server.listen(0);
     let port = server.address().port;
 

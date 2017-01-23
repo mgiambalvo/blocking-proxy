@@ -5,10 +5,4 @@ describe('BlockingProxy', () => {
     let proxy = new BlockingProxy(8111);
     expect(proxy.waitEnabled).toBe(true);
   });
-
-  it('should provide hooks when relaying commands',
-     () => {
-
-
-     });
 });

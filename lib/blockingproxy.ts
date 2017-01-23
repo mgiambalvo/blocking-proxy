@@ -244,7 +244,7 @@ export class BlockingProxy implements WebDriverBarrier {
       return;
     }
 
-    this.proxy.requestListener(originalRequest, response);
+    this.proxy.handleRequest(originalRequest, response);
   }
 
   onCommand(command: WebDriverCommand): Promise<void> {
