@@ -58,13 +58,8 @@ describe('WebDriver command parser', () => {
     let recentCommands = testBarrier.getCommandNames();
     expect(recentCommands.length).toBe(7);
     expect(recentCommands).toEqual([
-      CommandName.NewSession,
-      CommandName.Go,
-      CommandName.GetCurrentURL,
-      CommandName.Back,
-      CommandName.Forward,
-      CommandName.Refresh,
-      CommandName.GetTitle
+      CommandName.NewSession, CommandName.Go, CommandName.GetCurrentURL, CommandName.Back,
+      CommandName.Forward, CommandName.Refresh, CommandName.GetTitle
     ]);
   });
 
@@ -81,7 +76,7 @@ describe('WebDriver command parser', () => {
     let handle = await driver.getWindowHandle();
 
     let data = testBarrier.commands[2].responseData;
-    expect(data['value']).toEqual(7);
+    expect(data['value']).toEqual(handle);
   });
 
   afterEach(() => {

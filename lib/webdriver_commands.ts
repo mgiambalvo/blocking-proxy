@@ -2,7 +2,6 @@
  * Utilities for parsing WebDriver commands from HTTP Requests.
  */
 import * as events from 'events';
-import * as http from 'http';
 
 type HttpMethod = 'GET'|'POST'|'DELETE';
 export type paramKey = 'sessionId' | 'elementId' | 'name' | 'propertyName';
@@ -118,7 +117,7 @@ export class WebDriverCommand extends events.EventEmitter {
   public handleData(data?: any) {
     try {
       this.data = JSON.parse(data);
-    } catch(err) {
+    } catch (err) {
       this.data = data;
     }
     this.emit('data');
@@ -128,7 +127,7 @@ export class WebDriverCommand extends events.EventEmitter {
     this.responseStatus = statusCode;
     try {
       this.responseData = JSON.parse(data);
-    } catch(err) {
+    } catch (err) {
       this.responseData = data;
     }
     this.emit('response');

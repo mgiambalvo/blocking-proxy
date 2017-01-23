@@ -16,20 +16,16 @@ let getUrl = new Command<Session>('GET', 'url', (session, params) => {
 });
 
 // Back
-let forward = new Command<Session>('POST', 'back', (session, params) => {
-});
+let forward = new Command<Session>('POST', 'back', (session, params) => {});
 
 // Back
-let back = new Command<Session>('POST', 'forward', (session, params) => {
-});
+let back = new Command<Session>('POST', 'forward', (session, params) => {});
 
 // refresh
-let refresh = new Command<Session>('POST', 'refresh', (session, params) => {
-});
+let refresh = new Command<Session>('POST', 'refresh', (session, params) => {});
 
 // refresh
-let title = new Command<Session>('GET', 'title', (session, params) => {
-});
+let title = new Command<Session>('GET', 'title', (session, params) => {});
 
 // GetWindowHandle
 let getWindowHandle = new Command<Session>('GET', 'window_handle', (session, params) => {
