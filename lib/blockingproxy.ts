@@ -244,6 +244,7 @@ export class BlockingProxy implements WebDriverBarrier {
       return;
     }
 
+    // OK to ignore the promise returned by this.
     this.proxy.handleRequest(originalRequest, response);
   }
 

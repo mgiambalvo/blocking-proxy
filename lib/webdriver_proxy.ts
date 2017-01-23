@@ -4,7 +4,7 @@ import * as url from 'url';
 import {parseWebDriverCommand, WebDriverCommand} from './webdriver_commands';
 
 /**
- * A proxy that understands WebDriver commands. Users can add barriers * (similar to middleware in
+ * A proxy that understands WebDriver commands. Users can add barriers (similar to middleware in
  * express) that will be called before forwarding the request to WebDriver. The proxy will wait for
  * each barrier to finish, calling them in the order in which they were added.
  */
