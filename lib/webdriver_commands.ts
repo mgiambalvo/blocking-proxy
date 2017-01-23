@@ -119,7 +119,9 @@ export class WebDriverCommand extends events.EventEmitter {
 
   public handleResponse(statusCode: number, data?: any) {
     this.responseStatus = statusCode;
-    this.responseData = data;
+    if(data) {
+      this.responseData = JSON.parse(data);
+    }
     this.emit('response');
   }
 }
@@ -151,7 +153,7 @@ export function parseWebDriverCommand(url, method) {
 let sessionPrefix = '/session/:sessionId';
 addWebDriverCommand(CommandName.NewSession, 'POST', '/session');
 addWebDriverCommand(CommandName.DeleteSession, 'DELETE', '/session/:sessionId');
-addWebDriverCommand(CommandName.Status, 'GET', sessionPrefix + '/status');
+addWebDriverCommand(CommandName.Status, 'GET', '/status');
 addWebDriverCommand(CommandName.GetTimeouts, 'GET', sessionPrefix + '/timeouts');
 addWebDriverCommand(CommandName.SetTimeouts, 'POST', sessionPrefix + '/timeouts');
 addWebDriverCommand(CommandName.Go, 'POST', sessionPrefix + '/url');

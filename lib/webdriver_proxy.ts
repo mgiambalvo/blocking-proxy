@@ -26,7 +26,8 @@ export class WebDriverProxy {
 
     let replyWithError = (err) => {
       response.writeHead(500);
-      response.end(err);
+      response.write(err.toString());
+      response.end();
     };
 
     // TODO: What happens when barriers error? return a client error?
@@ -42,7 +43,6 @@ export class WebDriverProxy {
       options.headers = originalRequest.headers;
 
       let forwardedRequest = http.request(options);
-      console.log('Forwarding req');
 
       // clang-format off
       let reqData = '';
@@ -55,7 +55,6 @@ export class WebDriverProxy {
       }).on('error', replyWithError);
 
       forwardedRequest.on('response', (seleniumResponse) => {
-        console.log('Upstream response');
         response.writeHead(seleniumResponse.statusCode, seleniumResponse.headers);
 
         let respData = '';
@@ -64,7 +63,6 @@ export class WebDriverProxy {
           response.write(d);
         }).on('end', () => {
           command.handleResponse(seleniumResponse.statusCode, respData);
-          console.log('Response done');
           response.end();
         }).on('error', replyWithError);
 

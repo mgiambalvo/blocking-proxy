@@ -1,105 +1,114 @@
-import * as http from 'http';
-import * as stream from 'stream';
 import * as nock from 'nock';
 
 import {WebDriverProxy} from '../../lib/webdriver_proxy';
+import {InMemoryReader, InMemoryWriter, TestBarrier} from "./util";
+import {WebDriverCommand, CommandName} from "../../lib/webdriver_commands";
 
-class InMemoryWriter extends stream.Writable {
-  content: string[];
-  doneCb: Function;
-  done;
-
-  constructor() {
-    super({decodeStrings: true});
-    this.content = [];
-  }
-
-  _write(chunk: Buffer, encoding?, callback?) {
-    let data = chunk.toString();
-    this.content.push(data);
-    callback();
-  }
-
-  onEnd(cb: Function) {
-    this.doneCb = cb;
-  }
-
-  end() {
-    super.end();
-    this.doneCb(this.content);
-  }
-}
-
-class InMemoryReader extends stream.Readable {
-  content: string[];
-  idx: number;
-
-  constructor() {
-    super();
-    this.content = []
-    this.idx = 0;
-  }
-
-  _read() {
-    if (this.idx < this.content.length) {
-      this.push(this.content[this.idx++]);
-    } else {
-      this.push(null);
-    }
-  }
-}
-
-fdescribe('WebDriver Proxy', () => {
+describe('WebDriver Proxy', () => {
   let proxy: WebDriverProxy;
 
   beforeEach(() => {
     proxy = new WebDriverProxy(`http://localhost:4444/wd/hub`);
   });
 
-  fit('proxies to WebDriver', (done) => {
+  it('proxies to WebDriver', (done) => {
     let req = new InMemoryReader() as any;
     let resp = new InMemoryWriter() as any;
+    resp.writeHead = jasmine.createSpy('spy');
     req.url = '/session/sessionId/get';
     req.method = 'GET';
-
-    resp.writeHead = jasmine.createSpy('spy');
+    const responseData = {value: 'selenium response'};
 
     let scope = nock(proxy.seleniumAddress)
         .get('/session/sessionId/get')
-        .reply(500, 'test');
+        .reply(200, responseData);
 
     proxy.requestListener(req, resp);
 
-    resp.onEnd((content) => {
-      console.log(content);
-      console.log(resp.writeHead.calls.first());
+    resp.onEnd((data) => {
+      // Verify that all nock endpoints were called.
+      expect(resp.writeHead.calls.first().args[0]).toBe(200);
+      expect(data).toEqual(JSON.stringify(responseData));
       scope.done();
       done();
     });
   });
 
-  xit('waits for filters', () => {
+  it('waits for barriers', (done) => {
+    let req = new InMemoryReader() as any;
+    let resp = new InMemoryWriter() as any;
+    resp.writeHead = jasmine.createSpy('spy');
+    req.url = '/session/sessionId/get';
+    req.method = 'GET';
 
+    let barrier = new TestBarrier();
+    let barrierDone = false;
+    barrier.onCommand = (): Promise<void> => {
+      return new Promise<void>((res) => {
+        setTimeout(() => {
+          barrierDone = true;
+          res();
+        }, 250);
+      });
+    };
+
+    proxy.addBarrier(barrier);
+    proxy.requestListener(req, resp);
+
+    resp.onEnd(() => {
+      expect(barrierDone).toBeTruthy();
+      done();
+    });
   });
 
-  xit('filters can insert webdriver commands',
-     () => {
+  it('barriers get selenium responses', (done) => {
+    const WD_URL = '/session/sessionId/url';
+    const RESPONSE = {url: 'http://example.com'};
 
-     });
+    let req = new InMemoryReader() as any;
+    let resp = new InMemoryWriter() as any;
+    resp.writeHead = jasmine.createSpy('spy');
+    req.url = WD_URL;
+    req.method = 'GET';
 
-  xit('calls filters with webdriver responses',
-     () => {
+    let scope = nock(proxy.seleniumAddress)
+        .get(WD_URL)
+        .reply(200, RESPONSE);
 
-     });
+    let barrier = new TestBarrier();
+    barrier.onCommand = (command: WebDriverCommand): Promise<void> => {
+      command.on('response', () => {
+        expect(command.responseData['url']).toEqual(RESPONSE.url);
+        scope.done();
+        done();
+      });
+      return undefined;
+    };
+    proxy.addBarrier(barrier);
+    proxy.requestListener(req, resp);
+  });
 
-  xit('propagates http errors',
-     () => {
+  it('propagates http errors', (done) => {
+    const WD_URL = '/session/';
+    const ERR = new Error('HTTP error');
 
-     });
+    let req = new InMemoryReader() as any;
+    let resp = new InMemoryWriter() as any;
+    resp.writeHead = jasmine.createSpy('spy');
+    req.url = WD_URL;
+    req.method = 'POST';
 
-  xit('propagates headers to selenium',
-     () => {
+    let scope = nock(proxy.seleniumAddress)
+        .post(WD_URL)
+        .replyWithError(ERR);
 
-     });
+    proxy.requestListener(req, resp);
 
+    resp.onEnd((data) => {
+      expect(resp.writeHead.calls.first().args[0]).toBe(500);
+      expect(data).toEqual(ERR.toString());
+      scope.done();
+      done();
+    });
+  });
 });
