@@ -204,7 +204,7 @@ export class BlockingProxy implements WebDriverBarrier {
           'POST', BlockingProxy.executeAsyncUrl(url), function(stabilityResponse) {
             // TODO - If the response is that angular is not available on the
             // page, should we just go ahead and continue?
-            let stabilityData = ''
+            let stabilityData = '';
             stabilityResponse.on('data', (data) => {
               stabilityData += data;
             });

@@ -1,7 +1,7 @@
 import * as stream from 'stream';
 
-import {WebDriverBarrier} from "../../lib/webdriver_proxy";
-import {WebDriverCommand, CommandName} from "../../lib/webdriver_commands";
+import {CommandName, WebDriverCommand} from '../../lib/webdriver_commands';
+import {WebDriverBarrier} from '../../lib/webdriver_proxy';
 
 /**
  * Fakes and helpers for testing.
@@ -52,7 +52,7 @@ export class InMemoryReader extends stream.Readable {
 
   constructor() {
     super();
-    this.content = []
+    this.content = [];
     this.idx = 0;
   }
 

@@ -5,7 +5,7 @@ import * as webdriver from 'selenium-webdriver';
 import {CommandName} from '../../lib/webdriver_commands';
 import {WebDriverProxy} from '../../lib/webdriver_proxy';
 import {getMockSelenium, Session} from '../helpers/mock_selenium';
-import {TestBarrier} from "./util";
+import {TestBarrier} from './util';
 
 describe('WebDriver command parser', () => {
   let mockServer: Server<Session>;
@@ -43,9 +43,7 @@ describe('WebDriver command parser', () => {
     let recentCommands = testBarrier.getCommandNames();
     expect(recentCommands.length).toBe(3);
     expect(recentCommands).toEqual([
-        CommandName.NewSession,
-        CommandName.Go,
-        CommandName.DeleteSession
+      CommandName.NewSession, CommandName.Go, CommandName.DeleteSession
     ]);
     expect(testBarrier.commands[1].sessionId).toEqual(sessionId);
   });
@@ -56,9 +54,7 @@ describe('WebDriver command parser', () => {
     let recentCommands = testBarrier.getCommandNames();
     expect(recentCommands.length).toBe(3);
     expect(recentCommands).toEqual([
-      CommandName.NewSession,
-      CommandName.Go,
-      CommandName.GetCurrentURL
+      CommandName.NewSession, CommandName.Go, CommandName.GetCurrentURL
     ]);
   });
 

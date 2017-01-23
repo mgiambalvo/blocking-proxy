@@ -119,7 +119,7 @@ export class WebDriverCommand extends events.EventEmitter {
 
   public handleResponse(statusCode: number, data?: any) {
     this.responseStatus = statusCode;
-    if(data) {
+    if (data) {
       this.responseData = JSON.parse(data);
     }
     this.emit('response');

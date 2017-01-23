@@ -1,8 +1,9 @@
 import * as nock from 'nock';
 
+import {CommandName, WebDriverCommand} from '../../lib/webdriver_commands';
 import {WebDriverProxy} from '../../lib/webdriver_proxy';
-import {InMemoryReader, InMemoryWriter, TestBarrier} from "./util";
-import {WebDriverCommand, CommandName} from "../../lib/webdriver_commands";
+
+import {InMemoryReader, InMemoryWriter, TestBarrier} from './util';
 
 describe('WebDriver Proxy', () => {
   let proxy: WebDriverProxy;
@@ -19,9 +20,7 @@ describe('WebDriver Proxy', () => {
     req.method = 'GET';
     const responseData = {value: 'selenium response'};
 
-    let scope = nock(proxy.seleniumAddress)
-        .get('/session/sessionId/get')
-        .reply(200, responseData);
+    let scope = nock(proxy.seleniumAddress).get('/session/sessionId/get').reply(200, responseData);
 
     proxy.requestListener(req, resp);
 
@@ -71,9 +70,7 @@ describe('WebDriver Proxy', () => {
     req.url = WD_URL;
     req.method = 'GET';
 
-    let scope = nock(proxy.seleniumAddress)
-        .get(WD_URL)
-        .reply(200, RESPONSE);
+    let scope = nock(proxy.seleniumAddress).get(WD_URL).reply(200, RESPONSE);
 
     let barrier = new TestBarrier();
     barrier.onCommand = (command: WebDriverCommand): Promise<void> => {
@@ -98,9 +95,7 @@ describe('WebDriver Proxy', () => {
     req.url = WD_URL;
     req.method = 'POST';
 
-    let scope = nock(proxy.seleniumAddress)
-        .post(WD_URL)
-        .replyWithError(ERR);
+    let scope = nock(proxy.seleniumAddress).post(WD_URL).replyWithError(ERR);
 
     proxy.requestListener(req, resp);
 
