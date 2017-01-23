@@ -1,62 +1,105 @@
 import * as http from 'http';
-import {Server} from 'selenium-mock';
-import * as webdriver from 'selenium-webdriver';
+import * as stream from 'stream';
+import * as nock from 'nock';
 
-import {WebDriverCommand} from '../../lib/webdriver_commands';
-import {WebDriverBarrier, WebDriverProxy} from '../../lib/webdriver_proxy';
-import {getMockSelenium, Session} from '../helpers/mock_selenium';
+import {WebDriverProxy} from '../../lib/webdriver_proxy';
 
-class TestBarrier implements WebDriverBarrier {
-  commands: WebDriverCommand[] = [];
+class InMemoryWriter extends stream.Writable {
+  content: string[];
+  doneCb: Function;
+  done;
 
-  onCommand(command: WebDriverCommand): Promise<void> {
-    this.commands.push(command);
-    return undefined;
+  constructor() {
+    super({decodeStrings: true});
+    this.content = [];
+  }
+
+  _write(chunk: Buffer, encoding?, callback?) {
+    let data = chunk.toString();
+    this.content.push(data);
+    callback();
+  }
+
+  onEnd(cb: Function) {
+    this.doneCb = cb;
+  }
+
+  end() {
+    super.end();
+    this.doneCb(this.content);
   }
 }
 
-describe('WebDriver Proxy', () => {
-  let mockServer: Server<Session>;
-  let driver: webdriver.WebDriver;
+class InMemoryReader extends stream.Readable {
+  content: string[];
+  idx: number;
+
+  constructor() {
+    super();
+    this.content = []
+    this.idx = 0;
+  }
+
+  _read() {
+    if (this.idx < this.content.length) {
+      this.push(this.content[this.idx++]);
+    } else {
+      this.push(null);
+    }
+  }
+}
+
+fdescribe('WebDriver Proxy', () => {
   let proxy: WebDriverProxy;
-  let server: http.Server;
 
   beforeEach(() => {
-    mockServer = getMockSelenium();
-    mockServer.start();
-    let mockPort = mockServer.handle.address().port;
-
-    proxy = new WebDriverProxy(`http://localhost:${mockPort}/wd/hub`);
-    proxy.addBarrier(new TestBarrier());
-    server = http.createServer(proxy.requestListener.bind(proxy));
+    proxy = new WebDriverProxy(`http://localhost:4444/wd/hub`);
   });
 
-  it('forwards requests to WebDriver',
+  fit('proxies to WebDriver', (done) => {
+    let req = new InMemoryReader() as any;
+    let resp = new InMemoryWriter() as any;
+    req.url = '/session/sessionId/get';
+    req.method = 'GET';
+
+    resp.writeHead = jasmine.createSpy('spy');
+
+    let scope = nock(proxy.seleniumAddress)
+        .get('/session/sessionId/get')
+        .reply(500, 'test');
+
+    proxy.requestListener(req, resp);
+
+    resp.onEnd((content) => {
+      console.log(content);
+      console.log(resp.writeHead.calls.first());
+      scope.done();
+      done();
+    });
+  });
+
+  xit('waits for filters', () => {
+
+  });
+
+  xit('filters can insert webdriver commands',
      () => {
+
      });
 
-  it('waits for filters',
+  xit('calls filters with webdriver responses',
      () => {
 
      });
 
-  it('filters can insert webdriver commands',
+  xit('propagates http errors',
      () => {
 
      });
 
-  it('calls filters with webdriver responses',
+  xit('propagates headers to selenium',
      () => {
 
      });
 
-  it('propagates http errors',
-     () => {
-
-     });
-
-  it('propagates headers to selenium',
-     () => {
-
-     });
 });

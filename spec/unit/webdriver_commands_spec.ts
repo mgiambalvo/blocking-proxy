@@ -2,24 +2,10 @@ import * as http from 'http';
 import {Server} from 'selenium-mock';
 import * as webdriver from 'selenium-webdriver';
 
-import {WebDriverCommand, CommandName} from '../../lib/webdriver_commands';
-import {WebDriverBarrier, WebDriverProxy} from '../../lib/webdriver_proxy';
+import {CommandName} from '../../lib/webdriver_commands';
+import {WebDriverProxy} from '../../lib/webdriver_proxy';
 import {getMockSelenium, Session} from '../helpers/mock_selenium';
-
-const capabilities = webdriver.Capabilities.chrome();
-
-class TestBarrier implements WebDriverBarrier {
-  commands: WebDriverCommand[] = [];
-
-  onCommand(command: WebDriverCommand): Promise<void> {
-    this.commands.push(command);
-    return null;
-  }
-
-  getCommandNames() {
-    return this.commands.map((c) => c.commandName);
-  }
-}
+import {TestBarrier} from "./util";
 
 describe('WebDriver command parser', () => {
   let mockServer: Server<Session>;
@@ -42,7 +28,7 @@ describe('WebDriver command parser', () => {
 
     driver = new webdriver.Builder()
                  .usingServer(`http://localhost:${port}`)
-                 .withCapabilities(capabilities)
+                 .withCapabilities(webdriver.Capabilities.chrome())
                  .build();
 
     // Ensure WebDriver client has created a session by waiting on a command.
