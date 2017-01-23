@@ -75,7 +75,7 @@ describe('ng1 synchronizing with slow pages', () => {
 
     await clickElement('[ng-click="routingChange()"]');
 
-    let source = await driver.getPageSource()
+    let source = await driver.getPageSource();
     expect(source).toMatch('polling mechanism');
   }, 10000);
 

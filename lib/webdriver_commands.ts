@@ -15,6 +15,11 @@ export enum CommandName {
   SetTimeouts,
   Go,
   GetCurrentURL,
+  Back,
+  Forward,
+  Refresh,
+  GetTitle,
+  GetWindowHandle,
   UNKNOWN
 }
 
@@ -111,15 +116,19 @@ export class WebDriverCommand extends events.EventEmitter {
   }
 
   public handleData(data?: any) {
-    if (data) {
+    try {
       this.data = JSON.parse(data);
+    } catch(err) {
+      this.data = data;
     }
     this.emit('data');
   }
 
   public handleResponse(statusCode: number, data?: any) {
     this.responseStatus = statusCode;
-    if (data) {
+    try {
+      this.responseData = JSON.parse(data);
+    } catch(err) {
       this.responseData = data;
     }
     this.emit('response');
@@ -158,3 +167,9 @@ addWebDriverCommand(CommandName.GetTimeouts, 'GET', sessionPrefix + '/timeouts')
 addWebDriverCommand(CommandName.SetTimeouts, 'POST', sessionPrefix + '/timeouts');
 addWebDriverCommand(CommandName.Go, 'POST', sessionPrefix + '/url');
 addWebDriverCommand(CommandName.GetCurrentURL, 'GET', sessionPrefix + '/url');
+addWebDriverCommand(CommandName.Back, 'POST', sessionPrefix + '/back');
+addWebDriverCommand(CommandName.Forward, 'POST', sessionPrefix + '/forward');
+addWebDriverCommand(CommandName.Refresh, 'POST', sessionPrefix + '/refresh');
+addWebDriverCommand(CommandName.GetTitle, 'GET', sessionPrefix + '/title');
+addWebDriverCommand(CommandName.GetWindowHandle, 'GET', sessionPrefix + '/window');
+addWebDriverCommand(CommandName.GetWindowHandle, 'GET', sessionPrefix + '/window_handle');

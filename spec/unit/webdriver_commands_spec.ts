@@ -50,11 +50,21 @@ describe('WebDriver command parser', () => {
 
   it('parses url commands', async() => {
     await driver.getCurrentUrl();
+    await driver.navigate().back();
+    await driver.navigate().forward();
+    await driver.navigate().refresh();
+    await driver.getTitle();
 
     let recentCommands = testBarrier.getCommandNames();
-    expect(recentCommands.length).toBe(3);
+    expect(recentCommands.length).toBe(7);
     expect(recentCommands).toEqual([
-      CommandName.NewSession, CommandName.Go, CommandName.GetCurrentURL
+      CommandName.NewSession,
+      CommandName.Go,
+      CommandName.GetCurrentURL,
+      CommandName.Back,
+      CommandName.Forward,
+      CommandName.Refresh,
+      CommandName.GetTitle
     ]);
   });
 
@@ -63,6 +73,15 @@ describe('WebDriver command parser', () => {
 
     let recentCommands = testBarrier.getCommandNames();
     expect(recentCommands[2]).toEqual(CommandName.SetTimeouts);
+    let timeoutData = testBarrier.commands[2].data;
+    expect(timeoutData['ms']).toEqual(2468);
+  });
+
+  it('parses window commands', async() => {
+    let handle = await driver.getWindowHandle();
+
+    let data = testBarrier.commands[2].responseData;
+    expect(data['value']).toEqual(7);
   });
 
   afterEach(() => {
