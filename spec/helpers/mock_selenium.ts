@@ -108,6 +108,9 @@ let alertText = new Command<Session>('GET', 'alert_text', (session, params) => {
 // Accept Alert
 let acceptAlert = new Command<Session>('POST', 'accept_alert', (session, params) => {});
 
+// Dismiss Alert
+let dismissAlert = new Command<Session>('POST', 'dismiss_alert', (session, params) => {});
+
 // Actions
 let moveTo = new Command<Session>('POST', 'moveto', (session, params) => {});
 
@@ -145,6 +148,7 @@ export function getMockSelenium() {
   server.addCommand(elementSendKeys);
   server.addCommand(alertText);
   server.addCommand(acceptAlert);
+  server.addCommand(dismissAlert);
   server.addCommand(moveTo);
   server.addCommand(buttonDown);
   server.addCommand(buttonUp);

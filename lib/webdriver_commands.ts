@@ -33,6 +33,12 @@ export enum CommandName {
   ElementClick,
   ElementClear,
   ElementSendKeys,
+  WireMoveTo,
+  WireButtonDown,
+  WireButtonUp,
+  GetAlertText,
+  AcceptAlert,
+  DismissAlert,
   UNKNOWN
 }
 
@@ -119,7 +125,7 @@ export class WebDriverCommand extends events.EventEmitter {
     return this.getParam('sessionId');
   }
 
-  constructor(public commandName: CommandName, public url: string, params?) {
+  constructor(public commandName: CommandName, public url: string, public method: HttpMethod, params?) {
     super();
     this.params = params;
   }
@@ -165,11 +171,11 @@ export function parseWebDriverCommand(url, method) {
   for (let endpoint of endpoints) {
     if (endpoint.matches(url, method)) {
       let params = endpoint.getParams(url);
-      return new WebDriverCommand(endpoint.name, url, params);
+      return new WebDriverCommand(endpoint.name, url, method,  params);
     }
   }
 
-  return new WebDriverCommand(CommandName.UNKNOWN, url, {});
+  return new WebDriverCommand(CommandName.UNKNOWN, url, method, {});
 }
 
 let sessionPrefix = '/session/:sessionId';
@@ -212,3 +218,16 @@ addWebDriverCommand(CommandName.ElementClick, 'POST', sessionPrefix + '/element/
 addWebDriverCommand(CommandName.ElementClear, 'POST', sessionPrefix + '/element/:elementId/clear');
 addWebDriverCommand(
     CommandName.ElementSendKeys, 'POST', sessionPrefix + '/element/:elementId/value');
+
+addWebDriverCommand(CommandName.GetAlertText, 'GET', sessionPrefix + '/alert_text');
+addWebDriverCommand(CommandName.GetAlertText, 'GET', sessionPrefix + '/alert/text');
+addWebDriverCommand(CommandName.AcceptAlert, 'POST', sessionPrefix + '/alert/accept');
+addWebDriverCommand(CommandName.AcceptAlert, 'POST', sessionPrefix + '/accept_alert');
+addWebDriverCommand(CommandName.DismissAlert, 'POST', sessionPrefix + '/alert/dismiss');
+addWebDriverCommand(CommandName.DismissAlert, 'POST', sessionPrefix + '/dismiss_alert');
+
+// These commands are part of the JSON protocol, and were replaced by Perform Actions in the W3C
+// spec
+addWebDriverCommand(CommandName.WireMoveTo, 'POST', sessionPrefix + '/moveto');
+addWebDriverCommand(CommandName.WireButtonDown, 'POST', sessionPrefix + '/buttondown');
+addWebDriverCommand(CommandName.WireButtonUp, 'POST', sessionPrefix + '/buttonup');

@@ -7,12 +7,13 @@ import {WebDriverProxy} from '../../lib/webdriver_proxy';
 import {getMockSelenium, Session} from '../helpers/mock_selenium';
 import {TestBarrier} from './util';
 
-fdescribe('WebDriver command parser', () => {
+describe('WebDriver command parser', () => {
   let mockServer: Server<Session>;
   let driver: webdriver.WebDriver;
   let proxy: WebDriverProxy;
   let server: http.Server;
   let testBarrier: TestBarrier;
+  let port: number;
 
   beforeEach(async() => {
     mockServer = getMockSelenium();
@@ -24,7 +25,7 @@ fdescribe('WebDriver command parser', () => {
     proxy.addBarrier(testBarrier);
     server = http.createServer(proxy.handleRequest.bind(proxy));
     server.listen(0);
-    let port = server.address().port;
+    port = server.address().port;
 
     driver = new webdriver.Builder()
                  .usingServer(`http://localhost:${port}`)
@@ -114,19 +115,54 @@ fdescribe('WebDriver command parser', () => {
 
     await driver.actions().mouseMove({x: 10, y: 10}).dragAndDrop(el, {x: 20, y: 20}).perform();
 
-    console.log(testBarrier.getCommandNames());
+    expect(testBarrier.getCommands()).toEqual([
+      CommandName.NewSession,
+      CommandName.Go,
+      CommandName.FindElement,
+      CommandName.WireMoveTo,
+      CommandName.WireMoveTo,
+      CommandName.WireButtonDown,
+      CommandName.WireMoveTo,
+      CommandName.WireButtonUp
+    ]);
+    expect(testBarrier.commands[3].data).toEqual({xoffset: 10, yoffset :10});
   });
 
   it('parses alert commands', async() => {
+    await driver.switchTo().alert().dismiss();
     await driver.switchTo().alert().accept();
 
-    console.log(testBarrier.getCommandNames());
+    expect(testBarrier.getCommands()).toEqual([
+      CommandName.NewSession,
+      CommandName.Go,
+      CommandName.GetAlertText,
+      CommandName.DismissAlert,
+      CommandName.GetAlertText,
+      CommandName.AcceptAlert
+    ]);
   });
 
-  it('saves url and method for unknown commands',
-     () => {
+  it('saves url and method for unknown commands', (done) => {
+    const fakeUrl = '/session/abcdef/unknown';
+    let options: http.RequestOptions = {
+      port: port,
+      path: fakeUrl,
+      hostname: 'localhost',
+      method: 'GET'
+    };
 
-     });
+    let req = http.request(options);
+    req.end();
+
+    req.on('response', () => {
+      let lastCommand = testBarrier.commands[2];
+      expect(lastCommand.commandName).toBe(CommandName.UNKNOWN);
+      expect(lastCommand.url).toEqual(fakeUrl);
+      expect(lastCommand.method).toEqual('GET');
+      done();
+    });
+    req.on('error', done.fail);
+  });
 
   afterEach(() => {
     server.close();
