@@ -40,7 +40,7 @@ fdescribe('WebDriver command parser', () => {
     let sessionId = session.getId();
     await driver.quit();
 
-    let recentCommands = testBarrier.getCommandNames();
+    let recentCommands = testBarrier.getCommands();
     expect(recentCommands.length).toBe(3);
     expect(recentCommands).toEqual([
       CommandName.NewSession, CommandName.Go, CommandName.DeleteSession
@@ -55,7 +55,7 @@ fdescribe('WebDriver command parser', () => {
     await driver.navigate().refresh();
     await driver.getTitle();
 
-    let recentCommands = testBarrier.getCommandNames();
+    let recentCommands = testBarrier.getCommands();
     expect(recentCommands.length).toBe(7);
     expect(recentCommands).toEqual([
       CommandName.NewSession, CommandName.Go, CommandName.GetCurrentURL, CommandName.Back,
@@ -66,7 +66,7 @@ fdescribe('WebDriver command parser', () => {
   it('parses timeout commands', async() => {
     await driver.manage().timeouts().setScriptTimeout(2468);
 
-    let recentCommands = testBarrier.getCommandNames();
+    let recentCommands = testBarrier.getCommands();
     expect(recentCommands[2]).toEqual(CommandName.SetTimeouts);
     let timeoutData = testBarrier.commands[2].data;
     expect(timeoutData['ms']).toEqual(2468);
@@ -90,7 +90,7 @@ fdescribe('WebDriver command parser', () => {
     await el.findElements(webdriver.By.css('.inner_thing'));
 
     // let find = testBarrier.commands[2];
-    expect(testBarrier.getCommandNames()).toEqual([
+    expect(testBarrier.getCommands()).toEqual([
       CommandName.NewSession,
       CommandName.Go,
       CommandName.FindElement,
@@ -108,6 +108,25 @@ fdescribe('WebDriver command parser', () => {
       CommandName.FindElementsFromElement,
     ]);
   });
+
+  it('parses actions', async() => {
+    let el = driver.findElement(webdriver.By.css('.test'));
+
+    await driver.actions().mouseMove({x: 10, y: 10}).dragAndDrop(el, {x: 20, y: 20}).perform();
+
+    console.log(testBarrier.getCommandNames());
+  });
+
+  it('parses alert commands', async() => {
+    await driver.switchTo().alert().accept();
+
+    console.log(testBarrier.getCommandNames());
+  });
+
+  it('saves url and method for unknown commands',
+     () => {
+
+     });
 
   afterEach(() => {
     server.close();

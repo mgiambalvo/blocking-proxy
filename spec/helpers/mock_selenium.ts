@@ -102,6 +102,21 @@ let elementClear =
 let elementSendKeys =
     new Command<Session>('POST', 'element/:elementId/value', (session, params) => {});
 
+// Get Alert Text
+let alertText = new Command<Session>('GET', 'alert_text', (session, params) => {});
+
+// Accept Alert
+let acceptAlert = new Command<Session>('POST', 'accept_alert', (session, params) => {});
+
+// Actions
+let moveTo = new Command<Session>('POST', 'moveto', (session, params) => {});
+
+// Button Down
+let buttonDown = new Command<Session>('POST', 'buttondown', (session, params) => {});
+
+// Button Up
+let buttonUp = new Command<Session>('POST', 'buttonup', (session, params) => {});
+
 export function getMockSelenium() {
   let server = new Server<Session>(0);
   server.addCommand(setTimeouts);
@@ -128,5 +143,10 @@ export function getMockSelenium() {
   server.addCommand(elementClick);
   server.addCommand(elementClear);
   server.addCommand(elementSendKeys);
+  server.addCommand(alertText);
+  server.addCommand(acceptAlert);
+  server.addCommand(moveTo);
+  server.addCommand(buttonDown);
+  server.addCommand(buttonUp);
   return server;
 }
