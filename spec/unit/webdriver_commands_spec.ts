@@ -7,7 +7,7 @@ import {WebDriverProxy} from '../../lib/webdriver_proxy';
 import {getMockSelenium, Session} from '../helpers/mock_selenium';
 import {TestBarrier} from './util';
 
-describe('WebDriver command parser', () => {
+fdescribe('WebDriver command parser', () => {
   let mockServer: Server<Session>;
   let driver: webdriver.WebDriver;
   let proxy: WebDriverProxy;
@@ -72,11 +72,41 @@ describe('WebDriver command parser', () => {
     expect(timeoutData['ms']).toEqual(2468);
   });
 
-  it('parses window commands', async() => {
-    let handle = await driver.getWindowHandle();
+  it('parses element commands', async() => {
+    let el = driver.findElement(webdriver.By.css('.test'));
+    await el.click();
+    await el.getCssValue('fake-color');
+    await el.getAttribute('fake-attr');
+    await el.getTagName();
+    await el.getText();
+    await el.getSize();
+    await el.clear();
+    await el.sendKeys('test string');
 
-    let data = testBarrier.commands[2].responseData;
-    expect(data['value']).toEqual(handle);
+    let inner = el.findElement(webdriver.By.css('.inner_thing'));
+    await inner.click();
+
+    await driver.findElements(webdriver.By.id('thing'));
+    await el.findElements(webdriver.By.css('.inner_thing'));
+
+    // let find = testBarrier.commands[2];
+    expect(testBarrier.getCommandNames()).toEqual([
+      CommandName.NewSession,
+      CommandName.Go,
+      CommandName.FindElement,
+      CommandName.ElementClick,
+      CommandName.GetElementCSSValue,
+      CommandName.GetElementAttribute,
+      CommandName.GetElementTagName,
+      CommandName.GetElementText,
+      CommandName.GetElementRect,
+      CommandName.ElementClear,
+      CommandName.ElementSendKeys,
+      CommandName.FindElementFromElement,
+      CommandName.ElementClick,
+      CommandName.FindElements,
+      CommandName.FindElementsFromElement,
+    ]);
   });
 
   afterEach(() => {

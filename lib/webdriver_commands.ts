@@ -18,7 +18,21 @@ export enum CommandName {
   Forward,
   Refresh,
   GetTitle,
-  GetWindowHandle,
+  FindElement,
+  FindElements,
+  FindElementFromElement,
+  FindElementsFromElement,
+  IsElementSelected,
+  GetElementAttribute,
+  GetElementProperty,
+  GetElementCSSValue,
+  GetElementText,
+  GetElementTagName,
+  GetElementRect,
+  IsElementEnabled,
+  ElementClick,
+  ElementClear,
+  ElementSendKeys,
   UNKNOWN
 }
 
@@ -170,5 +184,31 @@ addWebDriverCommand(CommandName.Back, 'POST', sessionPrefix + '/back');
 addWebDriverCommand(CommandName.Forward, 'POST', sessionPrefix + '/forward');
 addWebDriverCommand(CommandName.Refresh, 'POST', sessionPrefix + '/refresh');
 addWebDriverCommand(CommandName.GetTitle, 'GET', sessionPrefix + '/title');
-addWebDriverCommand(CommandName.GetWindowHandle, 'GET', sessionPrefix + '/window');
-addWebDriverCommand(CommandName.GetWindowHandle, 'GET', sessionPrefix + '/window_handle');
+addWebDriverCommand(CommandName.FindElement, 'POST', sessionPrefix + '/element');
+addWebDriverCommand(CommandName.FindElements, 'POST', sessionPrefix + '/elements');
+addWebDriverCommand(
+    CommandName.FindElementFromElement, 'POST', sessionPrefix + '/element/:elementId/element');
+addWebDriverCommand(
+    CommandName.FindElementsFromElement, 'POST', sessionPrefix + '/element/:elementId/elements');
+addWebDriverCommand(
+    CommandName.IsElementSelected, 'POST', sessionPrefix + '/element/:elementId/selected');
+addWebDriverCommand(
+    CommandName.GetElementAttribute, 'GET',
+    sessionPrefix + '/element/:elementId/attribute/:attributeName');
+addWebDriverCommand(
+    CommandName.GetElementProperty, 'GET',
+    sessionPrefix + '/element/:elementId/property/:propertyName');
+addWebDriverCommand(
+    CommandName.GetElementCSSValue, 'GET',
+    sessionPrefix + '/element/:elementId/css/:cssPropertyName');
+addWebDriverCommand(CommandName.GetElementText, 'GET', sessionPrefix + '/element/:elementId/text');
+addWebDriverCommand(
+    CommandName.GetElementTagName, 'GET', sessionPrefix + '/element/:elementId/name');
+addWebDriverCommand(CommandName.GetElementRect, 'GET', sessionPrefix + '/element/:elementId/rect');
+addWebDriverCommand(CommandName.GetElementRect, 'GET', sessionPrefix + '/element/:elementId/size');
+addWebDriverCommand(
+    CommandName.IsElementEnabled, 'GET', sessionPrefix + '/element/:elementId/enabled');
+addWebDriverCommand(CommandName.ElementClick, 'POST', sessionPrefix + '/element/:elementId/click');
+addWebDriverCommand(CommandName.ElementClear, 'POST', sessionPrefix + '/element/:elementId/clear');
+addWebDriverCommand(
+    CommandName.ElementSendKeys, 'POST', sessionPrefix + '/element/:elementId/value');
