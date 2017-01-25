@@ -125,7 +125,9 @@ export class WebDriverCommand extends events.EventEmitter {
     return this.getParam('sessionId');
   }
 
-  constructor(public commandName: CommandName, public url: string, public method: HttpMethod, params?) {
+  constructor(
+      public commandName: CommandName, public readonly url: string,
+      public readonly method: HttpMethod, params?) {
     super();
     this.params = params;
   }
@@ -171,7 +173,7 @@ export function parseWebDriverCommand(url, method) {
   for (let endpoint of endpoints) {
     if (endpoint.matches(url, method)) {
       let params = endpoint.getParams(url);
-      return new WebDriverCommand(endpoint.name, url, method,  params);
+      return new WebDriverCommand(endpoint.name, url, method, params);
     }
   }
 

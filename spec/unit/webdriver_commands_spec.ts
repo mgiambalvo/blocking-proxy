@@ -116,16 +116,11 @@ describe('WebDriver command parser', () => {
     await driver.actions().mouseMove({x: 10, y: 10}).dragAndDrop(el, {x: 20, y: 20}).perform();
 
     expect(testBarrier.getCommands()).toEqual([
-      CommandName.NewSession,
-      CommandName.Go,
-      CommandName.FindElement,
-      CommandName.WireMoveTo,
-      CommandName.WireMoveTo,
-      CommandName.WireButtonDown,
-      CommandName.WireMoveTo,
+      CommandName.NewSession, CommandName.Go, CommandName.FindElement, CommandName.WireMoveTo,
+      CommandName.WireMoveTo, CommandName.WireButtonDown, CommandName.WireMoveTo,
       CommandName.WireButtonUp
     ]);
-    expect(testBarrier.commands[3].data).toEqual({xoffset: 10, yoffset :10});
+    expect(testBarrier.commands[3].data).toEqual({xoffset: 10, yoffset: 10});
   });
 
   it('parses alert commands', async() => {
@@ -133,23 +128,15 @@ describe('WebDriver command parser', () => {
     await driver.switchTo().alert().accept();
 
     expect(testBarrier.getCommands()).toEqual([
-      CommandName.NewSession,
-      CommandName.Go,
-      CommandName.GetAlertText,
-      CommandName.DismissAlert,
-      CommandName.GetAlertText,
-      CommandName.AcceptAlert
+      CommandName.NewSession, CommandName.Go, CommandName.GetAlertText, CommandName.DismissAlert,
+      CommandName.GetAlertText, CommandName.AcceptAlert
     ]);
   });
 
   it('saves url and method for unknown commands', (done) => {
     const fakeUrl = '/session/abcdef/unknown';
-    let options: http.RequestOptions = {
-      port: port,
-      path: fakeUrl,
-      hostname: 'localhost',
-      method: 'GET'
-    };
+    let options:
+        http.RequestOptions = {port: port, path: fakeUrl, hostname: 'localhost', method: 'GET'};
 
     let req = http.request(options);
     req.end();
