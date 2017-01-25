@@ -9,7 +9,7 @@ import {BlockingProxy} from '../../lib/blockingproxy';
 import {BP_URL, getTestEnv} from './environment';
 
 /*
-Example log of a test session:
+Example log of a test sessionv
 
 [12:51:30] Getting new "chrome" session
 [12:51:33] [abcdef] [0.5s] Navigating to 'http://localhost/stuff'
@@ -17,10 +17,17 @@ Example log of a test session:
 [12:51:36] [abcdef] [0.01s] Click on css '.test_element'
 [12:51:36] [abcdef] Move mouse by (0,50)
 [12:51:37] [abcdef] Click on binding 'thinger'
+
+12:15:36 | abcdef | 0.5s | NewSession
+  {
+    url: http:something.com/
+  }
+  Response:
+
  */
 
 
-describe('Logger', () => {
+fdescribe('Logger', () => {
   let driver: webdriver.WebDriver;
   let bp: BlockingProxy;
   let logDir: string;

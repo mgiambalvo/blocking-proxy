@@ -38,7 +38,7 @@ class InMemoryLogger extends WebDriverLogger {
   }
 }
 
-describe('WebDriver logger', () => {
+fdescribe('WebDriver logger', () => {
   let mockServer: Server<Session>;
   let driver: webdriver.WebDriver;
   let logger = new InMemoryLogger();
@@ -51,6 +51,7 @@ describe('WebDriver logger', () => {
     let mockPort = mockServer.handle.address().port;
 
     proxy = new BlockingProxy(`http://localhost:${mockPort}/wd/hub`);
+    proxy.waitEnabled = false;
     bpPort = proxy.listen(0);
     logger.setLogDir('.');
     proxy.setLogger(logger);
@@ -100,6 +101,26 @@ describe('WebDriver logger', () => {
 
     let log = logger.getLog();
     expect(log[1]).toContain(shortSession);
+  });
+
+  it('parses element commands', async() => {
+    let el = driver.findElement(webdriver.By.css('.test'));
+    await el.click();
+    await el.getCssValue('fake-color');
+    await el.getAttribute('fake-attr');
+    await el.getTagName();
+    await el.getText();
+    await el.getSize();
+    await el.clear();
+    await el.sendKeys('test string');
+
+    let inner = el.findElement(webdriver.By.css('.inner_thing'));
+    await inner.click();
+
+    await driver.findElements(webdriver.By.id('thing'));
+    await el.findElements(webdriver.By.css('.inner_thing'));
+
+    console.log(logger.getLog());
   });
 
   afterAll(() => {

@@ -39,17 +39,26 @@ export class WebDriverLogger {
     if (!this.logStream) {
       return;
     }
-    let cmdLog = this.printCommand(command);
+    //let cmdLog = this.printCommand(command);
 
     let logLine: string;
     if (command.getParam('sessionId')) {
       let session = command.getParam('sessionId').slice(0, 6);
-      logLine = `${this.timestamp()} [${session}] ${cmdLog}\n`;
+      logLine = `${this.timestamp()} [${session}]`;
     } else {
-      logLine = `${this.timestamp()} ${cmdLog}\n`;
+      logLine = `${this.timestamp()}`;
     }
 
-    this.logStream.write(logLine);
+    let started = Date.now();
+    command.on('response', () => {
+      let done = Date.now();
+      let elapsed = (done-started)/1000;
+      logLine += `${elapsed}s | ${CommandName[command.commandName]}\n`;
+      this.logStream.write(logLine);
+      if(command.commandName == CommandName.FindElement) {
+        this.logStream.write(JSON.stringify(command.responseData));
+      }
+    });
   }
 
   printCommand(command: WebDriverCommand) {
