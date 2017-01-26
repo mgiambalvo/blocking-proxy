@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as readline from 'readline';
-import * as rimraf from 'rimraf';
+//import * as rimraf from 'rimraf';
 import * as webdriver from 'selenium-webdriver';
 
 import {BlockingProxy} from '../../lib/blockingproxy';
@@ -57,7 +57,7 @@ fdescribe('Logger', () => {
   });
 
   afterEach((done) => {
-    rimraf(logDir, done);
+    //rimraf(logDir, done);
   });
 
   it('creates a log file', async() => {
@@ -90,5 +90,22 @@ fdescribe('Logger', () => {
         .toContain(`[${sessionId2}] Navigating to http://localhost:8081/ng1/#/async`);
 
     await otherDriver.quit();
+  });
+
+  fit('logs information about element finders', async() => {
+    await driver.get('http://localhost:8081/ng1/#/interaction');
+    let el = driver.findElement(webdriver.By.id('flux'));
+    await el.click();
+
+    try {
+      el = driver.findElement(webdriver.By.css('.none'));
+      await el.click();
+    } catch(e) {
+
+    }
+
+
+    let logLines = await readLog();
+    console.log(logLines);
   });
 });

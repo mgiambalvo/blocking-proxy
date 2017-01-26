@@ -9,6 +9,9 @@ function getLogId() {
   return Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(36).slice(0, 8);
 }
 
+const finderCmds = [CommandName.FindElement, CommandName.FindElementFromElement, CommandName.FindElements, CommandName.FindElementFromElement];
+const padding = '    ';
+
 /**
  * Logs WebDriver commands, transforming the command into a user-friendly description.
  */
@@ -44,22 +47,62 @@ export class WebDriverLogger {
     let logLine: string;
     if (command.getParam('sessionId')) {
       let session = command.getParam('sessionId').slice(0, 6);
-      logLine = `${this.timestamp()} [${session}]`;
+      logLine = `${this.timestamp()} | ${session} `;
     } else {
-      logLine = `${this.timestamp()}`;
+      logLine = `${this.timestamp()} `;
     }
 
     let started = Date.now();
     command.on('response', () => {
       let done = Date.now();
       let elapsed = (done-started)/1000;
-      logLine += `${elapsed}s | ${CommandName[command.commandName]}\n`;
-      this.logStream.write(logLine);
-      if(command.commandName == CommandName.FindElement) {
-        this.logStream.write(JSON.stringify(command.responseData));
+      if (command.commandName == CommandName.NewSession) {
+        let session = command.responseData['sessionId'].slice(0, 6);
+        logLine += `| ${session} `;
       }
+      logLine += `| ${elapsed}s | ${CommandName[command.commandName]}`;
+      if (command.commandName == CommandName.Go) {
+        logLine += ' ' + command.data['url'];
+      }
+      logLine += '\n';
+
+      this.logStream.write(logLine);
+      this.renderData(command);
+      this.renderResponse(command);
     });
   }
+
+
+  private renderData(command: WebDriverCommand) {
+    if (command.commandName == CommandName.NewSession) {
+      this.logStream.write(padding + JSON.stringify(command.data['desiredCapabilities']) + '\n');
+    } else if (finderCmds.indexOf(command.commandName) !== -1) {
+      this.logStream.write(padding + JSON.stringify(command.data) + '\n');
+    } else if (command.commandName == CommandName.ElementClick) {
+      this.logStream.write(padding + JSON.stringify(command.data));
+    }
+  }
+
+  private renderResponse(command: WebDriverCommand) {
+    if (command.responseStatus != 200) {
+      this.logStream.write(padding + `ERROR: ${command.responseData['state']}`);
+      return
+    }
+    if (finderCmds.indexOf(command.commandName) !== -1) {
+      this.logStream.write(padding + JSON.stringify(command.responseData['value']));
+    }
+
+  }
+
+  /*
+  private getFinderForElement() {
+
+  }
+
+  private saveFinderForElement() {
+
+  }
+  */
 
   printCommand(command: WebDriverCommand) {
     switch (command.commandName) {

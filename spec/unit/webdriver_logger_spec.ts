@@ -5,6 +5,7 @@ import * as stream from 'stream';
 import {BlockingProxy} from '../../lib/blockingproxy';
 import {WebDriverLogger} from '../../lib/webdriver_logger';
 import {getMockSelenium, Session} from '../helpers/mock_selenium';
+import {parseWebDriverCommand} from '../../lib/webdriver_commands';
 
 const capabilities = webdriver.Capabilities.chrome();
 
@@ -83,27 +84,22 @@ fdescribe('WebDriver logger', () => {
     await driver.quit();
 
     let log = logger.getLog();
-    expect(log[0]).toContain('Getting new "chrome" session');
-    expect(log[2]).toContain(`Deleting session ${shortSession}`);
+    expect(log[0]).toContain('NewSession');
+    expect(log[0]).toContain(shortSession);
+    expect(log[3]).toContain('DeleteSession');
+    expect(log[3]).toContain(shortSession);
   });
 
   it('logs url commands', async() => {
     await driver.getCurrentUrl();
 
     let log = logger.getLog();
-    expect(log[1]).toContain('Navigating to http://example.com');
-    expect(log[2]).toContain('Getting current URL');
+    expect(log[0]).toContain('NewSession');
+    expect(log[1]).toContain('chrome');
+    expect(log[2]).toContain('Go http://example.com');
   });
 
-  it('logs the session ID', async() => {
-    let session = await driver.getSession();
-    let shortSession = session.getId().slice(0, 6);
-
-    let log = logger.getLog();
-    expect(log[1]).toContain(shortSession);
-  });
-
-  it('parses element commands', async() => {
+  fit('parses element commands', async() => {
     let el = driver.findElement(webdriver.By.css('.test'));
     await el.click();
     await el.getCssValue('fake-color');
@@ -119,8 +115,39 @@ fdescribe('WebDriver logger', () => {
 
     await driver.findElements(webdriver.By.id('thing'));
     await el.findElements(webdriver.By.css('.inner_thing'));
+  });
 
-    console.log(logger.getLog());
+  it('logs response errors', () => {
+    let cmd = parseWebDriverCommand('/session/abcdef/url', 'GET');
+
+    logger.logWebDriverCommand(cmd);
+    cmd.handleResponse(500, {'state': 'Selenium Error'});
+
+    let log = logger.getLog();
+    expect(log[4]).toContain('ERROR: Selenium Error');
+  });
+
+  it('shows how long commands take', async() => {
+    jasmine.clock().install();
+
+    let cmd = parseWebDriverCommand('/session/abcdef/url', 'GET');
+
+    let start = new Date('2017-01-26T22:05:34.000Z');
+    jasmine.clock().mockDate(start)
+    logger.logWebDriverCommand(cmd);
+
+    let delay = new Promise((res) => setTimeout(() => {
+      cmd.handleResponse(200, {});
+      res();
+    }, 1234));
+
+    jasmine.clock().tick(2000);
+    await delay;
+
+    let log = logger.getLog();
+    expect(log[3]).toContain('[14:05:34.000] | abcdef | 1.234s | GetCurrentURL');
+
+    jasmine.clock().uninstall();
   });
 
   afterAll(() => {
