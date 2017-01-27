@@ -45,7 +45,7 @@ describe('WebDriver logger', () => {
   let logger = new InMemoryLogger();
   let proxy: BlockingProxy;
   let bpPort: number;
-  let start = new Date('2017-01-26T22:05:34.000Z');
+  let start = new Date('2017-01-26 22:05:34.000');
 
   beforeAll(() => {
     mockServer = getMockSelenium();
@@ -126,21 +126,21 @@ describe('WebDriver logger', () => {
 
     let log = logger.getLog();
     let expectedLog = [
-      `[14:05:34.000] |      0ms | ${shortSession} | FindElement\n`,
+      `[22:05:34.000] |      0ms | ${shortSession} | FindElement\n`,
       `    Using css selector '.test'\n`,
       `    Elements: 0\n`,
-      `[14:05:34.000] |      0ms | ${shortSession} | ElementClick (0)\n`,
-      `[14:05:34.000] |      0ms | ${shortSession} | ElementClear (0)\n`,
-      `[14:05:34.000] |      0ms | ${shortSession} | ElementSendKeys (0)\n`,
+      `[22:05:34.000] |      0ms | ${shortSession} | ElementClick (0)\n`,
+      `[22:05:34.000] |      0ms | ${shortSession} | ElementClear (0)\n`,
+      `[22:05:34.000] |      0ms | ${shortSession} | ElementSendKeys (0)\n`,
       `    Send: test string\n`,
-      `[14:05:34.000] |      0ms | ${shortSession} | FindElementFromElement (0)\n`,
+      `[22:05:34.000] |      0ms | ${shortSession} | FindElementFromElement (0)\n`,
       `    Using css selector '.inner_thing'\n`,
       `    Elements: 0\n`,
-      `[14:05:34.000] |      0ms | ${shortSession} | ElementClick (0)\n`,
-      `[14:05:34.000] |      0ms | ${shortSession} | FindElements\n`,
+      `[22:05:34.000] |      0ms | ${shortSession} | ElementClick (0)\n`,
+      `[22:05:34.000] |      0ms | ${shortSession} | FindElements\n`,
       `    Using css selector '*[id=\"thing\"]'\n`,
       `    Elements: 0,1\n`,
-      `[14:05:34.000] |      0ms | ${shortSession} | FindElementsFromElement (0)\n`,
+      `[22:05:34.000] |      0ms | ${shortSession} | FindElementsFromElement (0)\n`,
       `    Using css selector '.inner_thing'\n`,
       `    Elements: 0,1\n`,
     ];
@@ -164,18 +164,18 @@ describe('WebDriver logger', () => {
     let log = logger.getLog();
 
     let expectedLog = [
-      `[14:05:34.000] |      0ms | ${shortSession} | FindElement\n`,
+      `[22:05:34.000] |      0ms | ${shortSession} | FindElement\n`,
       `    Using css selector '.test'\n`,
       `    Elements: 0\n`,
-      `[14:05:34.000] |      0ms | ${shortSession} | GetElementCSSValue (0)\n`,
+      `[22:05:34.000] |      0ms | ${shortSession} | GetElementCSSValue (0)\n`,
       `    white\n`,
-      `[14:05:34.000] |      0ms | ${shortSession} | GetElementAttribute (0)\n`,
+      `[22:05:34.000] |      0ms | ${shortSession} | GetElementAttribute (0)\n`,
       `    null\n`,
-      `[14:05:34.000] |      0ms | ${shortSession} | GetElementTagName (0)\n`,
+      `[22:05:34.000] |      0ms | ${shortSession} | GetElementTagName (0)\n`,
       `    button\n`,
-      `[14:05:34.000] |      0ms | ${shortSession} | GetElementText (0)\n`,
+      `[22:05:34.000] |      0ms | ${shortSession} | GetElementText (0)\n`,
       `    some text\n`,
-      `[14:05:34.000] |      0ms | ${shortSession} | GetElementRect (0)\n`,
+      `[22:05:34.000] |      0ms | ${shortSession} | GetElementRect (0)\n`,
       `    {"width":88,"hCode":88,"class":"org.openqa.selenium.Dimension","height":20}\n`,
     ];
     for (let line in expectedLog) {
@@ -206,7 +206,7 @@ describe('WebDriver logger', () => {
     await delay;
 
     let log = logger.getLog();
-    expect(log[3]).toContain('[14:05:34.000] |   1234ms | abcdef | GetCurrentURL');
+    expect(log[3]).toContain('[22:05:34.000] |   1234ms | abcdef | GetCurrentURL');
   });
 
   it('handles unknown commands', async() => {
@@ -219,10 +219,10 @@ describe('WebDriver logger', () => {
 
     let log = logger.getLog();
     let expectedLog = [
-      `[14:05:34.000] |      0ms | ${shortSession} | NewSession\n`,
+      `[22:05:34.000] |      0ms | ${shortSession} | NewSession\n`,
       `    {"browserName":"chrome"}\n`,
-      `[14:05:34.000] |      0ms | ${shortSession} | Go http://example.com\n`,
-      `[14:05:34.000] |      0ms | /session/abcdef/not_a_command\n`
+      `[22:05:34.000] |      0ms | ${shortSession} | Go http://example.com\n`,
+      `[22:05:34.000] |      0ms | /session/abcdef/not_a_command\n`
     ];
     for (let line in expectedLog) {
       expect(log[line]).toEqual(expectedLog[line], `Expected line: ${line} to match`);

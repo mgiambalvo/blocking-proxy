@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as readline from 'readline';
-import * as rimraf from 'rimraf';
+//import * as rimraf from 'rimraf';
 import * as webdriver from 'selenium-webdriver';
 
 import {BlockingProxy} from '../../lib/blockingproxy';
@@ -51,7 +51,7 @@ describe('Logger', () => {
   });
 
   afterEach((done) => {
-    rimraf(logDir, done);
+    //rimraf(logDir, done);
   });
 
   it('creates a log file', async() => {
@@ -102,8 +102,7 @@ describe('Logger', () => {
       'Go http://localhost:8081/ng1/#/interaction', 'FindElement',
       'Using css selector \'*[id="flux"]\'', 'Elements: 0', 'ElementClick (0)',
       'GetElementCSSValue (0)', 'GetElementAttribute (0)', '    null', 'GetElementTagName (0)',
-      '    button', 'GetElementText (0)', '    Status: fluxing', 'GetElementRect (0)',
-      '    {"width":88,"hCode":88,"class":"org.openqa.selenium.Dimension","height":20}'
+      '    button', 'GetElementText (0)', '    Status: fluxing', 'GetElementRect (0)'
     ];
     for (let line in expectedLog) {
       expect(logLines[line]).toContain(expectedLog[line], `Expected line: ${line} to match`);
