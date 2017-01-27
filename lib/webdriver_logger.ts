@@ -9,8 +9,14 @@ function getLogId() {
   return Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(36).slice(0, 8);
 }
 
-const FINDERS = [CommandName.FindElement, CommandName.FindElementFromElement, CommandName.FindElements, CommandName.FindElementsFromElement];
-const READERS = [CommandName.GetElementTagName, CommandName.GetElementText, CommandName.GetElementAttribute, CommandName.GetElementProperty, CommandName.GetElementCSSValue]
+const FINDERS = [
+  CommandName.FindElement, CommandName.FindElementFromElement, CommandName.FindElements,
+  CommandName.FindElementsFromElement
+];
+const READERS = [
+  CommandName.GetElementTagName, CommandName.GetElementText, CommandName.GetElementAttribute,
+  CommandName.GetElementProperty, CommandName.GetElementCSSValue, CommandName.GetElementRect
+];
 const PAD = '    ';
 
 /**
@@ -43,7 +49,7 @@ export class WebDriverLogger {
     if (!this.logStream) {
       return;
     }
-    //let cmdLog = this.printCommand(command);
+    // let cmdLog = this.printCommand(command);
 
     let logLine: string;
     if (command.getParam('sessionId')) {
@@ -56,7 +62,7 @@ export class WebDriverLogger {
     let started = Date.now();
     command.on('response', () => {
       let done = Date.now();
-      let elapsed = (done-started)/1000;
+      let elapsed = (done - started) / 1000;
       if (command.commandName == CommandName.NewSession) {
         let session = command.responseData['sessionId'].slice(0, 6);
         logLine += `| ${session} `;
@@ -64,8 +70,8 @@ export class WebDriverLogger {
       logLine += `| ${elapsed}s | ${CommandName[command.commandName]}`;
       if (command.commandName == CommandName.Go) {
         logLine += ' ' + command.data['url'];
-      } else if (command.getParam("elementId")) {
-        logLine += ` (${command.getParam("elementId")})`;
+      } else if (command.getParam('elementId')) {
+        logLine += ` (${command.getParam('elementId')})`;
       }
       logLine += '\n';
 
@@ -76,38 +82,44 @@ export class WebDriverLogger {
   }
 
   private renderData(command: WebDriverCommand) {
+    let dataLine = '';
     if (command.commandName === CommandName.NewSession) {
-      this.logStream.write(PAD + JSON.stringify(command.data['desiredCapabilities']) + '\n');
+      dataLine = JSON.stringify(command.data['desiredCapabilities']);
 
-    } else if(command.commandName === CommandName.ElementSendKeys) {
+    } else if (command.commandName === CommandName.ElementSendKeys) {
       let value = command.data['value'].join('');
-      this.logStream.write(PAD + `Send: ${value}\n`);
+      dataLine = `Send: ${value}`;
 
-    } else if(FINDERS.indexOf(command.commandName) !== -1) {
+    } else if (FINDERS.indexOf(command.commandName) !== -1) {
       const using = command.data['using'];
       const value = command.data['value'];
-      this.logStream.write(PAD + `Using ${using} '${value}'\n`);
+      dataLine = `Using ${using} '${value}'`;
+    }
+    if (dataLine) {
+      this.logStream.write(PAD + dataLine + '\n');
     }
   }
 
   private renderResponse(command: WebDriverCommand) {
+    let respLine = '';
     if (command.responseStatus != 200) {
-      this.logStream.write(PAD + `ERROR: ${command.responseData['state']}`);
-      return
-    }
-    if (FINDERS.indexOf(command.commandName) !== -1) {
+      respLine = `ERROR: ${command.responseData['state']}`;
+    } else if (FINDERS.indexOf(command.commandName) !== -1) {
       let els = command.responseData['value'];
       if (!Array.isArray(els)) {
         els = [els];
       }
-      els = els.map((e) => e["ELEMENT"]);
-      this.logStream.write(PAD + 'Elements: ' + els + '\n');
+      els = els.map((e) => e['ELEMENT']);
+      respLine = 'Elements: ' + els;
+    } else if (READERS.indexOf(command.commandName) !== -1) {
+      respLine = command.responseData['value'];
+      if (typeof respLine == 'object') {
+        respLine = JSON.stringify(respLine);
+      }
     }
-
-    if (READERS.indexOf(command.commandName) !== -1) {
-      this.logStream.write(PAD + command.responseData['value'] + '\n');
+    if (respLine) {
+      this.logStream.write(PAD + respLine + '\n');
     }
-
   }
 
   timestamp(): string {

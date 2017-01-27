@@ -3,9 +3,9 @@ import * as webdriver from 'selenium-webdriver';
 import * as stream from 'stream';
 
 import {BlockingProxy} from '../../lib/blockingproxy';
+import {parseWebDriverCommand} from '../../lib/webdriver_commands';
 import {WebDriverLogger} from '../../lib/webdriver_logger';
 import {getMockSelenium, Session} from '../helpers/mock_selenium';
-import {parseWebDriverCommand} from '../../lib/webdriver_commands';
 
 const capabilities = webdriver.Capabilities.chrome();
 
@@ -39,12 +39,13 @@ class InMemoryLogger extends WebDriverLogger {
   }
 }
 
-fdescribe('WebDriver logger', () => {
+describe('WebDriver logger', () => {
   let mockServer: Server<Session>;
   let driver: webdriver.WebDriver;
   let logger = new InMemoryLogger();
   let proxy: BlockingProxy;
   let bpPort: number;
+  let start = new Date('2017-01-26T22:05:34.000Z');
 
   beforeAll(() => {
     mockServer = getMockSelenium();
@@ -66,9 +67,13 @@ fdescribe('WebDriver logger', () => {
 
     // Ensure WebDriver client has created a session by waiting on a command.
     await driver.get('http://example.com');
+
+    jasmine.clock().install();
+    jasmine.clock().mockDate(start);
   });
 
   afterEach(() => {
+    jasmine.clock().uninstall();
     logger.reset();
   });
 
@@ -99,13 +104,10 @@ fdescribe('WebDriver logger', () => {
     expect(log[2]).toContain('Go http://example.com');
   });
 
-  fit('parses commands that affect elements', async() => {
-    let session = await driver.getSession()
+  it('parses commands that affect elements', async() => {
+    let session = await driver.getSession();
     let shortSession = session.getId().slice(0, 6);
     logger.reset();
-    jasmine.clock().install();
-    let start = new Date('2017-01-26T22:05:34.000Z');
-    jasmine.clock().mockDate(start)
 
     let el = driver.findElement(webdriver.By.css('.test'));
     await el.click();
@@ -117,7 +119,6 @@ fdescribe('WebDriver logger', () => {
 
     await driver.findElements(webdriver.By.id('thing'));
     await el.findElements(webdriver.By.css('.inner_thing'));
-    jasmine.clock().uninstall();
 
     let log = logger.getLog();
     let expectedLog = [
@@ -140,20 +141,14 @@ fdescribe('WebDriver logger', () => {
       `    Elements: 0,1\n`,
     ];
     for (let line in expectedLog) {
-      expect(log[line]).toEqual(expectedLog[line],
-          `Expected line: ${line} to match`);
+      expect(log[line]).toEqual(expectedLog[line], `Expected line: ${line} to match`);
     }
-    console.log(log);
   });
 
   it('parses commands that read elements', async() => {
     logger.reset();
-    let session = await driver.getSession()
+    let session = await driver.getSession();
     let shortSession = session.getId().slice(0, 6);
-
-    jasmine.clock().install();
-    let start = new Date('2017-01-26T22:05:34.000Z');
-    jasmine.clock().mockDate(start)
 
     let el = driver.findElement(webdriver.By.css('.test'));
     await el.getCssValue('color');
@@ -164,24 +159,23 @@ fdescribe('WebDriver logger', () => {
 
     let log = logger.getLog();
 
-    console.log(log);
     let expectedLog = [
-        `[14:05:34.000] | ${shortSession} | 0s | FindElement\n`,
-        `    {"using":"css selector","value":".test"}\n`,
-        `    {"ELEMENT":"0"}\n`,
-        `[14:05:34.000] | ${shortSession} | 0s | GetElementCSSValue\n`,
-        `    undefined\n`,
-        `[14:05:34.000] | ${shortSession} | 0s | GetElementAttribute\n`,
-        `    undefined\n`,
-        `[14:05:34.000] | ${shortSession} | 0s | GetElementTagName\n`,
-        `    undefined\n`,
-        `[14:05:34.000] | ${shortSession} | 0s | GetElementText\n`,
-        `    undefined\n`,
-        `[14:05:34.000] | ${shortSession} | 0s | GetElementRect\n`
+      `[14:05:34.000] | ${shortSession} | 0s | FindElement\n`,
+      `    Using css selector '.test'\n`,
+      `    Elements: 0\n`,
+      `[14:05:34.000] | ${shortSession} | 0s | GetElementCSSValue (0)\n`,
+      `    white\n`,
+      `[14:05:34.000] | ${shortSession} | 0s | GetElementAttribute (0)\n`,
+      `    null\n`,
+      `[14:05:34.000] | ${shortSession} | 0s | GetElementTagName (0)\n`,
+      `    button\n`,
+      `[14:05:34.000] | ${shortSession} | 0s | GetElementText (0)\n`,
+      `    some text\n`,
+      `[14:05:34.000] | ${shortSession} | 0s | GetElementRect (0)\n`,
+      `    {"width":88,"hCode":88,"class":"org.openqa.selenium.Dimension","height":20}\n`,
     ];
     for (let line in expectedLog) {
-      expect(log[line]).toEqual(expectedLog[line],
-        `Expected line: ${line} to match`);
+      expect(log[line]).toEqual(expectedLog[line], `Expected line: ${line} to match`);
     }
   });
 
@@ -196,26 +190,19 @@ fdescribe('WebDriver logger', () => {
   });
 
   it('shows how long commands take', async() => {
-    jasmine.clock().install();
-
     let cmd = parseWebDriverCommand('/session/abcdef/url', 'GET');
-
-    let start = new Date('2017-01-26T22:05:34.000Z');
-    jasmine.clock().mockDate(start)
     logger.logWebDriverCommand(cmd);
 
     let delay = new Promise((res) => setTimeout(() => {
-      cmd.handleResponse(200, {});
-      res();
-    }, 1234));
+                              cmd.handleResponse(200, {});
+                              res();
+                            }, 1234));
 
     jasmine.clock().tick(2000);
     await delay;
 
     let log = logger.getLog();
     expect(log[3]).toContain('[14:05:34.000] | abcdef | 1.234s | GetCurrentURL');
-
-    jasmine.clock().uninstall();
   });
 
   afterAll(() => {
