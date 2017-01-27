@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as readline from 'readline';
-// import * as rimraf from 'rimraf';
+import * as rimraf from 'rimraf';
 import * as webdriver from 'selenium-webdriver';
 
 import {BlockingProxy} from '../../lib/blockingproxy';
@@ -9,21 +9,15 @@ import {BlockingProxy} from '../../lib/blockingproxy';
 import {BP_URL, getTestEnv} from './environment';
 
 /*
-Example log of a test sessionv
+Example log of a test session
 
-[12:51:30] Getting new "chrome" session
-[12:51:33] [abcdef] [0.5s] Navigating to 'http://localhost/stuff'
-[12:51:35] [abcdef] [0.3s] Wait for Angular
-[12:51:36] [abcdef] [0.01s] Click on css '.test_element'
-[12:51:36] [abcdef] Move mouse by (0,50)
-[12:51:37] [abcdef] Click on binding 'thinger'
-
-12:15:36 | abcdef | 0.5s | NewSession
-  {
-    url: http:something.com/
-  }
-  Response:
-
+[20:08:14.830] |    834ms | 37f13c | NewSession',
+    {"browserName":"chrome"}',
+[20:08:15.674] |      4ms | 37f13c | SetTimeouts',
+[20:08:15.681] |    578ms | 37f13c | Go http://localhost:8081/ng1/#/interaction',
+[20:08:16.300] |    438ms | 37f13c | FindElement',
+    Using css selector \'.none\'',
+    ERROR: no such element'
  */
 
 
@@ -56,10 +50,9 @@ describe('Logger', () => {
     bp.enableLogging(logDir);
   });
 
-  afterEach(
-      (done) => {
-          // rimraf(logDir, done);
-      });
+  afterEach((done) => {
+    rimraf(logDir, done);
+  });
 
   it('creates a log file', async() => {
     await driver.get('http://localhost:8081/ng1/#/async');
@@ -85,15 +78,15 @@ describe('Logger', () => {
     let logLines = await readLog();
     let sessionId1 = session1.getId().slice(0, 6);
     let sessionId2 = session2.getId().slice(0, 6);
-    expect(logLines[1])
-        .toContain(`[${sessionId1}] Navigating to http://localhost:8081/ng1/#/interaction`);
-    expect(logLines[2])
-        .toContain(`[${sessionId2}] Navigating to http://localhost:8081/ng1/#/async`);
+    expect(logLines[2]).toContain(`Go http://localhost:8081/ng1/#/interaction`);
+    expect(logLines[2]).toContain(sessionId1);
+    expect(logLines[3]).toContain(`Go http://localhost:8081/ng1/#/async`);
+    expect(logLines[3]).toContain(sessionId2);
 
     await otherDriver.quit();
   });
 
-  fit('logs information about element finders', async() => {
+  it('logs information about element finders', async() => {
     await driver.get('http://localhost:8081/ng1/#/interaction');
     let el = driver.findElement(webdriver.By.id('flux'));
     await el.click();
@@ -104,28 +97,29 @@ describe('Logger', () => {
     await el.getText();
     await el.getSize();
 
-    try {
-      await el.clear();
-
-      el = driver.findElement(webdriver.By.css('.none'));
-      await el.click();
-    } catch (e) {
-    }
-
-
     let logLines = await readLog();
-    console.log(logLines);
+    let expectedLog = [
+      'Go http://localhost:8081/ng1/#/interaction', 'FindElement',
+      'Using css selector \'*[id="flux"]\'', 'Elements: 0', 'ElementClick (0)',
+      'GetElementCSSValue (0)', 'GetElementAttribute (0)', '    null', 'GetElementTagName (0)',
+      '    button', 'GetElementText (0)', '    Status: fluxing', 'GetElementRect (0)',
+      '    {"width":88,"hCode":88,"class":"org.openqa.selenium.Dimension","height":20}'
+    ];
+    for (let line in expectedLog) {
+      expect(logLines[line]).toContain(expectedLog[line], `Expected line: ${line} to match`);
+    }
   });
 
-  fit('handles missing elements', async() => {
+  it('handles selenium errors', async() => {
     await driver.get('http://localhost:8081/ng1/#/interaction');
-    let el = driver.findElement(webdriver.By.id('flux'));
     try {
-      await el.clear();
-
-      el = driver.findElement(webdriver.By.css('.none'));
+      let el = driver.findElement(webdriver.By.css('.none'));
       await el.click();
     } catch (e) {
+      // Nothing to do.
     }
+
+    let logLines = await readLog();
+    expect(logLines[3]).toContain('ERROR: no such element');
   });
 });

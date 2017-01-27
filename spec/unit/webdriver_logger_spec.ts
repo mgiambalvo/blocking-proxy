@@ -227,5 +227,5 @@ describe('WebDriver logger', () => {
     for (let line in expectedLog) {
       expect(log[line]).toEqual(expectedLog[line], `Expected line: ${line} to match`);
     }
-  })
+  });
 });
