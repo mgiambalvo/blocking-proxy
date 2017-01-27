@@ -97,7 +97,14 @@ fdescribe('Logger', () => {
     let el = driver.findElement(webdriver.By.id('flux'));
     await el.click();
 
+    await el.getCssValue('fake-color');
+    await el.getAttribute('fake-attr');
+    await el.getTagName();
+    await el.getText();
+    await el.getSize();
     try {
+    await el.clear();
+
       el = driver.findElement(webdriver.By.css('.none'));
       await el.click();
     } catch(e) {

@@ -9,8 +9,9 @@ function getLogId() {
   return Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(36).slice(0, 8);
 }
 
-const finderCmds = [CommandName.FindElement, CommandName.FindElementFromElement, CommandName.FindElements, CommandName.FindElementFromElement];
-const padding = '    ';
+const FINDERS = [CommandName.FindElement, CommandName.FindElementFromElement, CommandName.FindElements, CommandName.FindElementsFromElement];
+const READERS = [CommandName.GetElementTagName, CommandName.GetElementText, CommandName.GetElementAttribute, CommandName.GetElementProperty, CommandName.GetElementCSSValue]
+const PAD = '    ';
 
 /**
  * Logs WebDriver commands, transforming the command into a user-friendly description.
@@ -63,6 +64,8 @@ export class WebDriverLogger {
       logLine += `| ${elapsed}s | ${CommandName[command.commandName]}`;
       if (command.commandName == CommandName.Go) {
         logLine += ' ' + command.data['url'];
+      } else if (command.getParam("elementId")) {
+        logLine += ` (${command.getParam("elementId")})`;
       }
       logLine += '\n';
 
@@ -72,53 +75,39 @@ export class WebDriverLogger {
     });
   }
 
-
   private renderData(command: WebDriverCommand) {
-    if (command.commandName == CommandName.NewSession) {
-      this.logStream.write(padding + JSON.stringify(command.data['desiredCapabilities']) + '\n');
-    } else if (finderCmds.indexOf(command.commandName) !== -1) {
-      this.logStream.write(padding + JSON.stringify(command.data) + '\n');
-    } else if (command.commandName == CommandName.ElementClick) {
-      this.logStream.write(padding + JSON.stringify(command.data));
+    if (command.commandName === CommandName.NewSession) {
+      this.logStream.write(PAD + JSON.stringify(command.data['desiredCapabilities']) + '\n');
+
+    } else if(command.commandName === CommandName.ElementSendKeys) {
+      let value = command.data['value'].join('');
+      this.logStream.write(PAD + `Send: ${value}\n`);
+
+    } else if(FINDERS.indexOf(command.commandName) !== -1) {
+      const using = command.data['using'];
+      const value = command.data['value'];
+      this.logStream.write(PAD + `Using ${using} '${value}'\n`);
     }
   }
 
   private renderResponse(command: WebDriverCommand) {
     if (command.responseStatus != 200) {
-      this.logStream.write(padding + `ERROR: ${command.responseData['state']}`);
+      this.logStream.write(PAD + `ERROR: ${command.responseData['state']}`);
       return
     }
-    if (finderCmds.indexOf(command.commandName) !== -1) {
-      this.logStream.write(padding + JSON.stringify(command.responseData['value']));
+    if (FINDERS.indexOf(command.commandName) !== -1) {
+      let els = command.responseData['value'];
+      if (!Array.isArray(els)) {
+        els = [els];
+      }
+      els = els.map((e) => e["ELEMENT"]);
+      this.logStream.write(PAD + 'Elements: ' + els + '\n');
     }
 
-  }
-
-  /*
-  private getFinderForElement() {
-
-  }
-
-  private saveFinderForElement() {
-
-  }
-  */
-
-  printCommand(command: WebDriverCommand) {
-    switch (command.commandName) {
-      case CommandName.NewSession:
-        let desired = command.data['desiredCapabilities'];
-        return `Getting new "${desired['browserName']}" session`;
-      case CommandName.DeleteSession:
-        let sessionId = command.getParam('sessionId').slice(0, 6);
-        return `Deleting session ${sessionId}`;
-      case CommandName.Go:
-        return `Navigating to ${command.data['url']}`;
-      case CommandName.GetCurrentURL:
-        return `Getting current URL`;
-      default:
-        return `Unknown command ${command.url}`;
+    if (READERS.indexOf(command.commandName) !== -1) {
+      this.logStream.write(PAD + command.responseData['value'] + '\n');
     }
+
   }
 
   timestamp(): string {

@@ -39,7 +39,7 @@ let findElement = new Command<Session>('POST', 'element', (session, params) => {
 
 // Find Elements
 let findElements = new Command<Session>('POST', 'elements', (session, params) => {
-  return [{'ELEMENT': '0'}];
+  return [{'ELEMENT': '0'}, {'ELEMENT': '1'}];
 });
 
 // Find Element From Element
@@ -51,7 +51,7 @@ let findElementFromElement =
 // Find Elements From Element
 let findElementsFromElement =
     new Command<Session>('POST', 'element/:elementId/elements', (session, params) => {
-      return [{'ELEMENT': '0'}];
+      return [{'ELEMENT': '0'}, {'ELEMENT': '1'}];
     });
 
 // Is Element Selected
@@ -64,7 +64,9 @@ let getElementAttribute = new Command<Session>(
 
 // Get Element Property
 let getElementProperty = new Command<Session>(
-    'GET', 'element/:elementId/property/:propertyName', (session, params) => {});
+    'GET', 'element/:elementId/property/:propertyName', (session, params) => {
+      return "Property";
+    });
 
 // Get Element CSS Value
 let getElementCSSValue =

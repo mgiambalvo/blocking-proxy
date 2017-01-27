@@ -99,14 +99,16 @@ fdescribe('WebDriver logger', () => {
     expect(log[2]).toContain('Go http://example.com');
   });
 
-  fit('parses element commands', async() => {
+  fit('parses commands that affect elements', async() => {
+    let session = await driver.getSession()
+    let shortSession = session.getId().slice(0, 6);
+    logger.reset();
+    jasmine.clock().install();
+    let start = new Date('2017-01-26T22:05:34.000Z');
+    jasmine.clock().mockDate(start)
+
     let el = driver.findElement(webdriver.By.css('.test'));
     await el.click();
-    await el.getCssValue('fake-color');
-    await el.getAttribute('fake-attr');
-    await el.getTagName();
-    await el.getText();
-    await el.getSize();
     await el.clear();
     await el.sendKeys('test string');
 
@@ -115,6 +117,72 @@ fdescribe('WebDriver logger', () => {
 
     await driver.findElements(webdriver.By.id('thing'));
     await el.findElements(webdriver.By.css('.inner_thing'));
+    jasmine.clock().uninstall();
+
+    let log = logger.getLog();
+    let expectedLog = [
+      `[14:05:34.000] | ${shortSession} | 0s | FindElement\n`,
+      `    Using css selector '.test'\n`,
+      `    Elements: 0\n`,
+      `[14:05:34.000] | ${shortSession} | 0s | ElementClick (0)\n`,
+      `[14:05:34.000] | ${shortSession} | 0s | ElementClear (0)\n`,
+      `[14:05:34.000] | ${shortSession} | 0s | ElementSendKeys (0)\n`,
+      `    Send: test string\n`,
+      `[14:05:34.000] | ${shortSession} | 0s | FindElementFromElement (0)\n`,
+      `    Using css selector '.inner_thing'\n`,
+      `    Elements: 0\n`,
+      `[14:05:34.000] | ${shortSession} | 0s | ElementClick (0)\n`,
+      `[14:05:34.000] | ${shortSession} | 0s | FindElements\n`,
+      `    Using css selector '*[id=\"thing\"]'\n`,
+      `    Elements: 0,1\n`,
+      `[14:05:34.000] | ${shortSession} | 0s | FindElementsFromElement (0)\n`,
+      `    Using css selector '.inner_thing'\n`,
+      `    Elements: 0,1\n`,
+    ];
+    for (let line in expectedLog) {
+      expect(log[line]).toEqual(expectedLog[line],
+          `Expected line: ${line} to match`);
+    }
+    console.log(log);
+  });
+
+  it('parses commands that read elements', async() => {
+    logger.reset();
+    let session = await driver.getSession()
+    let shortSession = session.getId().slice(0, 6);
+
+    jasmine.clock().install();
+    let start = new Date('2017-01-26T22:05:34.000Z');
+    jasmine.clock().mockDate(start)
+
+    let el = driver.findElement(webdriver.By.css('.test'));
+    await el.getCssValue('color');
+    await el.getAttribute('id');
+    await el.getTagName();
+    await el.getText();
+    await el.getSize();
+
+    let log = logger.getLog();
+
+    console.log(log);
+    let expectedLog = [
+        `[14:05:34.000] | ${shortSession} | 0s | FindElement\n`,
+        `    {"using":"css selector","value":".test"}\n`,
+        `    {"ELEMENT":"0"}\n`,
+        `[14:05:34.000] | ${shortSession} | 0s | GetElementCSSValue\n`,
+        `    undefined\n`,
+        `[14:05:34.000] | ${shortSession} | 0s | GetElementAttribute\n`,
+        `    undefined\n`,
+        `[14:05:34.000] | ${shortSession} | 0s | GetElementTagName\n`,
+        `    undefined\n`,
+        `[14:05:34.000] | ${shortSession} | 0s | GetElementText\n`,
+        `    undefined\n`,
+        `[14:05:34.000] | ${shortSession} | 0s | GetElementRect\n`
+    ];
+    for (let line in expectedLog) {
+      expect(log[line]).toEqual(expectedLog[line],
+        `Expected line: ${line} to match`);
+    }
   });
 
   it('logs response errors', () => {
