@@ -9,7 +9,7 @@ function getLogId() {
   return Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(36).slice(0, 8);
 }
 
-//
+// Super proprietary left pad implementation. Do not copy plzkthx.
 function leftPad(field: string): string {
   const fieldWidth = 6;
   let padding = fieldWidth - field.length;
@@ -60,7 +60,6 @@ export class WebDriverLogger {
     if (!this.logStream) {
       return;
     }
-    // let cmdLog = this.printCommand(command);
 
     let logLine: string;
     logLine = `${this.timestamp()} `;
@@ -147,6 +146,6 @@ export class WebDriverLogger {
     let seconds = d.getSeconds() < 10 ? '0' + d.getSeconds() : d.getSeconds();
     let millis = d.getMilliseconds().toString();
     millis = '000'.slice(0, 3 - millis.length) + millis;
-    return `[${hours}:${minutes}:${seconds}.${millis}]`;
+    return `${hours}:${minutes}:${seconds}.${millis}`;
   }
 }

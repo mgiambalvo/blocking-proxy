@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as readline from 'readline';
-//import * as rimraf from 'rimraf';
+import * as rimraf from 'rimraf';
 import * as webdriver from 'selenium-webdriver';
 
 import {BlockingProxy} from '../../lib/blockingproxy';
@@ -11,11 +11,11 @@ import {BP_URL, getTestEnv} from './environment';
 /*
 Example log of a test session
 
-[20:08:14.830] |    834ms | 37f13c | NewSession',
+20:08:14.830 |    834ms | 37f13c | NewSession',
     {"browserName":"chrome"}',
-[20:08:15.674] |      4ms | 37f13c | SetTimeouts',
-[20:08:15.681] |    578ms | 37f13c | Go http://localhost:8081/ng1/#/interaction',
-[20:08:16.300] |    438ms | 37f13c | FindElement',
+20:08:15.674 |      4ms | 37f13c | SetTimeouts',
+20:08:15.681 |    578ms | 37f13c | Go http://localhost:8081/ng1/#/interaction',
+20:08:16.300 |    438ms | 37f13c | FindElement',
     Using css selector \'.none\'',
     ERROR: no such element'
  */
@@ -51,7 +51,7 @@ describe('Logger', () => {
   });
 
   afterEach((done) => {
-    //rimraf(logDir, done);
+    rimraf(logDir, done);
   });
 
   it('creates a log file', async() => {
