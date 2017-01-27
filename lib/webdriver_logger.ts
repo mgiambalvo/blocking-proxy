@@ -10,7 +10,7 @@ function getLogId() {
 }
 
 //
-function padField(field: string): string {
+function leftPad(field: string): string {
   const fieldWidth = 6;
   let padding = fieldWidth - field.length;
   if (padding > 0) {
@@ -63,23 +63,29 @@ export class WebDriverLogger {
     // let cmdLog = this.printCommand(command);
 
     let logLine: string;
-    if (command.getParam('sessionId')) {
-      let session = command.getParam('sessionId').slice(0, 6);
-      logLine = `${this.timestamp()} | ${session} `;
-    } else {
-      logLine = `${this.timestamp()} `;
-    }
+    logLine = `${this.timestamp()} `;
 
     let started = Date.now();
     command.on('response', () => {
       let done = Date.now();
-      let elapsed = padField((done - started) + '');
+      let elapsed = leftPad((done - started) + '');
+      logLine += `| ${elapsed}ms `;
 
-      if (command.commandName == CommandName.NewSession) {
+      if (command.getParam('sessionId')) {
+        let session = command.getParam('sessionId').slice(0, 6);
+        logLine += `| ${session} `;
+      } else if (command.commandName == CommandName.NewSession) {
+        // Only for new session commands, the sessionId is in the response.
         let session = command.responseData['sessionId'].slice(0, 6);
         logLine += `| ${session} `;
       }
-      logLine += `| ${elapsed}ms | ${CommandName[command.commandName]}`;
+
+      if (command.commandName == CommandName.UNKNOWN) {
+        logLine += `| ${command.url}`;
+      } else {
+        logLine += `| ${CommandName[command.commandName]}`;
+      }
+
       if (command.commandName == CommandName.Go) {
         logLine += ' ' + command.data['url'];
       } else if (command.getParam('elementId')) {

@@ -64,6 +64,9 @@ describe('WebDriver logger', () => {
   });
 
   beforeEach(async() => {
+    jasmine.clock().install();
+    jasmine.clock().mockDate(start);
+
     driver = new webdriver.Builder()
                  .usingServer(`http://localhost:${bpPort}`)
                  .withCapabilities(capabilities)
@@ -71,9 +74,6 @@ describe('WebDriver logger', () => {
 
     // Ensure WebDriver client has created a session by waiting on a command.
     await driver.get('http://example.com');
-
-    jasmine.clock().install();
-    jasmine.clock().mockDate(start);
   });
 
   afterEach(() => {
@@ -126,21 +126,21 @@ describe('WebDriver logger', () => {
 
     let log = logger.getLog();
     let expectedLog = [
-      `[14:05:34.000] | ${shortSession} |      0ms | FindElement\n`,
+      `[14:05:34.000] |      0ms | ${shortSession} | FindElement\n`,
       `    Using css selector '.test'\n`,
       `    Elements: 0\n`,
-      `[14:05:34.000] | ${shortSession} |      0ms | ElementClick (0)\n`,
-      `[14:05:34.000] | ${shortSession} |      0ms | ElementClear (0)\n`,
-      `[14:05:34.000] | ${shortSession} |      0ms | ElementSendKeys (0)\n`,
+      `[14:05:34.000] |      0ms | ${shortSession} | ElementClick (0)\n`,
+      `[14:05:34.000] |      0ms | ${shortSession} | ElementClear (0)\n`,
+      `[14:05:34.000] |      0ms | ${shortSession} | ElementSendKeys (0)\n`,
       `    Send: test string\n`,
-      `[14:05:34.000] | ${shortSession} |      0ms | FindElementFromElement (0)\n`,
+      `[14:05:34.000] |      0ms | ${shortSession} | FindElementFromElement (0)\n`,
       `    Using css selector '.inner_thing'\n`,
       `    Elements: 0\n`,
-      `[14:05:34.000] | ${shortSession} |      0ms | ElementClick (0)\n`,
-      `[14:05:34.000] | ${shortSession} |      0ms | FindElements\n`,
+      `[14:05:34.000] |      0ms | ${shortSession} | ElementClick (0)\n`,
+      `[14:05:34.000] |      0ms | ${shortSession} | FindElements\n`,
       `    Using css selector '*[id=\"thing\"]'\n`,
       `    Elements: 0,1\n`,
-      `[14:05:34.000] | ${shortSession} |      0ms | FindElementsFromElement (0)\n`,
+      `[14:05:34.000] |      0ms | ${shortSession} | FindElementsFromElement (0)\n`,
       `    Using css selector '.inner_thing'\n`,
       `    Elements: 0,1\n`,
     ];
@@ -164,18 +164,18 @@ describe('WebDriver logger', () => {
     let log = logger.getLog();
 
     let expectedLog = [
-      `[14:05:34.000] | ${shortSession} |      0ms | FindElement\n`,
+      `[14:05:34.000] |      0ms | ${shortSession} | FindElement\n`,
       `    Using css selector '.test'\n`,
       `    Elements: 0\n`,
-      `[14:05:34.000] | ${shortSession} |      0ms | GetElementCSSValue (0)\n`,
+      `[14:05:34.000] |      0ms | ${shortSession} | GetElementCSSValue (0)\n`,
       `    white\n`,
-      `[14:05:34.000] | ${shortSession} |      0ms | GetElementAttribute (0)\n`,
+      `[14:05:34.000] |      0ms | ${shortSession} | GetElementAttribute (0)\n`,
       `    null\n`,
-      `[14:05:34.000] | ${shortSession} |      0ms | GetElementTagName (0)\n`,
+      `[14:05:34.000] |      0ms | ${shortSession} | GetElementTagName (0)\n`,
       `    button\n`,
-      `[14:05:34.000] | ${shortSession} |      0ms | GetElementText (0)\n`,
+      `[14:05:34.000] |      0ms | ${shortSession} | GetElementText (0)\n`,
       `    some text\n`,
-      `[14:05:34.000] | ${shortSession} |      0ms | GetElementRect (0)\n`,
+      `[14:05:34.000] |      0ms | ${shortSession} | GetElementRect (0)\n`,
       `    {"width":88,"hCode":88,"class":"org.openqa.selenium.Dimension","height":20}\n`,
     ];
     for (let line in expectedLog) {
@@ -206,6 +206,26 @@ describe('WebDriver logger', () => {
     await delay;
 
     let log = logger.getLog();
-    expect(log[3]).toContain('[14:05:34.000] | abcdef |   1234ms | GetCurrentURL');
+    expect(log[3]).toContain('[14:05:34.000] |   1234ms | abcdef | GetCurrentURL');
   });
+
+  it('handles unknown commands', async() => {
+    let session = await driver.getSession();
+    let shortSession = session.getId().slice(0, 6);
+
+    let cmd = parseWebDriverCommand('/session/abcdef/not_a_command', 'GET');
+    logger.logWebDriverCommand(cmd);
+    cmd.handleResponse(200, {});
+
+    let log = logger.getLog();
+    let expectedLog = [
+      `[14:05:34.000] |      0ms | ${shortSession} | NewSession\n`,
+      `    {"browserName":"chrome"}\n`,
+      `[14:05:34.000] |      0ms | ${shortSession} | Go http://example.com\n`,
+      `[14:05:34.000] |      0ms | /session/abcdef/not_a_command\n`
+    ];
+    for (let line in expectedLog) {
+      expect(log[line]).toEqual(expectedLog[line], `Expected line: ${line} to match`);
+    }
+  })
 });
