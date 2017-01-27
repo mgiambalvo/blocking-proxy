@@ -59,6 +59,10 @@ describe('WebDriver logger', () => {
     proxy.setLogger(logger);
   });
 
+  afterAll(() => {
+    mockServer.stop();
+  });
+
   beforeEach(async() => {
     driver = new webdriver.Builder()
                  .usingServer(`http://localhost:${bpPort}`)
@@ -122,21 +126,21 @@ describe('WebDriver logger', () => {
 
     let log = logger.getLog();
     let expectedLog = [
-      `[14:05:34.000] | ${shortSession} | 0s | FindElement\n`,
+      `[14:05:34.000] | ${shortSession} |      0ms | FindElement\n`,
       `    Using css selector '.test'\n`,
       `    Elements: 0\n`,
-      `[14:05:34.000] | ${shortSession} | 0s | ElementClick (0)\n`,
-      `[14:05:34.000] | ${shortSession} | 0s | ElementClear (0)\n`,
-      `[14:05:34.000] | ${shortSession} | 0s | ElementSendKeys (0)\n`,
+      `[14:05:34.000] | ${shortSession} |      0ms | ElementClick (0)\n`,
+      `[14:05:34.000] | ${shortSession} |      0ms | ElementClear (0)\n`,
+      `[14:05:34.000] | ${shortSession} |      0ms | ElementSendKeys (0)\n`,
       `    Send: test string\n`,
-      `[14:05:34.000] | ${shortSession} | 0s | FindElementFromElement (0)\n`,
+      `[14:05:34.000] | ${shortSession} |      0ms | FindElementFromElement (0)\n`,
       `    Using css selector '.inner_thing'\n`,
       `    Elements: 0\n`,
-      `[14:05:34.000] | ${shortSession} | 0s | ElementClick (0)\n`,
-      `[14:05:34.000] | ${shortSession} | 0s | FindElements\n`,
+      `[14:05:34.000] | ${shortSession} |      0ms | ElementClick (0)\n`,
+      `[14:05:34.000] | ${shortSession} |      0ms | FindElements\n`,
       `    Using css selector '*[id=\"thing\"]'\n`,
       `    Elements: 0,1\n`,
-      `[14:05:34.000] | ${shortSession} | 0s | FindElementsFromElement (0)\n`,
+      `[14:05:34.000] | ${shortSession} |      0ms | FindElementsFromElement (0)\n`,
       `    Using css selector '.inner_thing'\n`,
       `    Elements: 0,1\n`,
     ];
@@ -160,18 +164,18 @@ describe('WebDriver logger', () => {
     let log = logger.getLog();
 
     let expectedLog = [
-      `[14:05:34.000] | ${shortSession} | 0s | FindElement\n`,
+      `[14:05:34.000] | ${shortSession} |      0ms | FindElement\n`,
       `    Using css selector '.test'\n`,
       `    Elements: 0\n`,
-      `[14:05:34.000] | ${shortSession} | 0s | GetElementCSSValue (0)\n`,
+      `[14:05:34.000] | ${shortSession} |      0ms | GetElementCSSValue (0)\n`,
       `    white\n`,
-      `[14:05:34.000] | ${shortSession} | 0s | GetElementAttribute (0)\n`,
+      `[14:05:34.000] | ${shortSession} |      0ms | GetElementAttribute (0)\n`,
       `    null\n`,
-      `[14:05:34.000] | ${shortSession} | 0s | GetElementTagName (0)\n`,
+      `[14:05:34.000] | ${shortSession} |      0ms | GetElementTagName (0)\n`,
       `    button\n`,
-      `[14:05:34.000] | ${shortSession} | 0s | GetElementText (0)\n`,
+      `[14:05:34.000] | ${shortSession} |      0ms | GetElementText (0)\n`,
       `    some text\n`,
-      `[14:05:34.000] | ${shortSession} | 0s | GetElementRect (0)\n`,
+      `[14:05:34.000] | ${shortSession} |      0ms | GetElementRect (0)\n`,
       `    {"width":88,"hCode":88,"class":"org.openqa.selenium.Dimension","height":20}\n`,
     ];
     for (let line in expectedLog) {
@@ -202,10 +206,6 @@ describe('WebDriver logger', () => {
     await delay;
 
     let log = logger.getLog();
-    expect(log[3]).toContain('[14:05:34.000] | abcdef | 1.234s | GetCurrentURL');
-  });
-
-  afterAll(() => {
-    mockServer.stop();
+    expect(log[3]).toContain('[14:05:34.000] | abcdef |   1234ms | GetCurrentURL');
   });
 });

@@ -9,6 +9,17 @@ function getLogId() {
   return Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(36).slice(0, 8);
 }
 
+//
+function padField(field: string): string {
+  const fieldWidth = 6;
+  let padding = fieldWidth - field.length;
+  if (padding > 0) {
+    return ' '.repeat(padding) + field;
+  }
+  return field;
+}
+
+
 const FINDERS = [
   CommandName.FindElement, CommandName.FindElementFromElement, CommandName.FindElements,
   CommandName.FindElementsFromElement
@@ -62,12 +73,13 @@ export class WebDriverLogger {
     let started = Date.now();
     command.on('response', () => {
       let done = Date.now();
-      let elapsed = (done - started) / 1000;
+      let elapsed = padField((done - started) + '');
+
       if (command.commandName == CommandName.NewSession) {
         let session = command.responseData['sessionId'].slice(0, 6);
         logLine += `| ${session} `;
       }
-      logLine += `| ${elapsed}s | ${CommandName[command.commandName]}`;
+      logLine += `| ${elapsed}ms | ${CommandName[command.commandName]}`;
       if (command.commandName == CommandName.Go) {
         logLine += ' ' + command.data['url'];
       } else if (command.getParam('elementId')) {

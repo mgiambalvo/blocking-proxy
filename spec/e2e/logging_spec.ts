@@ -93,7 +93,7 @@ describe('Logger', () => {
     await otherDriver.quit();
   });
 
-  it('logs information about element finders', async() => {
+  fit('logs information about element finders', async() => {
     await driver.get('http://localhost:8081/ng1/#/interaction');
     let el = driver.findElement(webdriver.By.id('flux'));
     await el.click();
@@ -117,7 +117,7 @@ describe('Logger', () => {
     console.log(logLines);
   });
 
-  it('handles missing elements', async() => {
+  fit('handles missing elements', async() => {
     await driver.get('http://localhost:8081/ng1/#/interaction');
     let el = driver.findElement(webdriver.By.id('flux'));
     try {
